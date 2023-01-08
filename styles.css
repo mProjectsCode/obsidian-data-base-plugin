@@ -1,8 +1,74 @@
-/*
+.theme-dark {
+	--db-plugin-background-modifier-hover-light: rgba(255, 255, 255, 0.0375);
+}
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
+.theme-light {
+	--db-plugin-background-modifier-hover-light: rgba(0, 0, 0, 0.0375);
+}
 
-If your plugin does not need CSS, delete this file.
+.db-plugin-table {
+	width: 100%;
+	border-collapse: collapse;
+}
 
-*/
+.db-plugin-th {
+
+}
+
+.db-plugin-th-row {
+
+}
+
+.db-plugin-th-cell {
+	padding: var(--size-4-2);
+	border-bottom: 1px solid var(--table-header-border-color);
+}
+
+.db-plugin-th-cell-content {
+	display: inline-flex;
+	flex-direction: row;
+	width: 100%;
+}
+
+.db-plugin-th-cell-content-text {
+	flex: 1;
+	text-align: start;
+}
+
+.db-plugin-th-cell-content-icon {
+
+}
+
+.db-plugin-tb {
+
+}
+
+.db-plugin-tb-row {
+
+}
+
+.db-plugin-tb-row:hover {
+	background: var(--db-plugin-background-modifier-hover-light);
+}
+
+
+.db-plugin-tb-cell {
+	padding: var(--size-4-2);
+	border-bottom: 1px solid var(--table-header-border-color);
+}
+
+.db-plugin-tb-cell:hover {
+	background: var(--db-plugin-background-modifier-hover-light);
+}
+
+.db-plugin-clickable-icon-wrapper {
+	border-radius: var(--size-4-1);
+	padding: var(--size-4-1);
+	height: calc(18px + 2 * var(--size-4-1));
+	width: calc(18px + 2 * var(--size-4-1));
+	cursor: pointer;
+}
+
+.db-plugin-clickable-icon-wrapper:hover {
+	background: var(--background-modifier-hover);
+}
