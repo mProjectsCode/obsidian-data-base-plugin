@@ -1,9 +1,19 @@
 <script lang="ts">
-	import Icon from '../utils/Icon.svelte';
 	import {SortingMode, TableColumn, TableData} from '../utils/TableParser';
 	import {onMount} from 'svelte';
+	import * as Clusterize from 'clusterize.js';
+	import {compareTableEntriesByColumns} from '../utils/Utils';
+	import {SimpleColumnEditModal} from '../modals/SimpleColumnEditModal';
+	import TableHeaderComponent from './TableHeaderComponent.svelte';
+	import {AbstractTableView} from '../views/AbstractTableView';
 
 	export let tableData: TableData;
+	export let view: AbstractTableView;
+
+	let clusterizeRows: string[] = [];
+	let clusterize;
+	let clusterizeScrollElement: HTMLElement;
+	let clusterizeContentElement: HTMLElement;
 
 	onMount(() => {
 		console.log(tableData);
@@ -11,16 +21,26 @@
 		if (tableData.columns.length > 0) {
 			sort();
 		}
-	})
 
-	function setSortingMode(column: TableColumn): void {
-		const mode: SortingMode = tableData.sortingMode && tableData.sortingMode.column === column.name ? getNextSortingMode(tableData.sortingMode.mode) : getDefaultSortingMode();
-		const columnName: string = mode === SortingMode.ASCENDING || mode === SortingMode.DESCENDING ? column.name : getDefaultSortingColumnName();
+		clusterize = new Clusterize.prototype.constructor({
+			rows: clusterizeRows,
+			scrollElem: clusterizeScrollElement,
+			contentElem: clusterizeContentElement,
+		});
+
+		updateClusterize();
+	});
+
+	function cycleSortingMode(event: CustomEvent): void {
+		const column = event.detail.column;
+
+		const mode: SortingMode = tableData.sortingMode && tableData.sortingMode.column === column ? getNextSortingMode(tableData.sortingMode.mode) : getDefaultSortingMode().mode;
+		const columnName: TableColumn = column;
 
 		tableData.sortingMode = {
 			mode: mode,
 			column: columnName,
-		}
+		};
 
 		sort();
 	}
@@ -35,12 +55,11 @@
 		}
 	}
 
-	function getDefaultSortingMode(): SortingMode {
-		return SortingMode.DESCENDING;
-	}
-
-	function getDefaultSortingColumnName(): string {
-		return tableData.columns[0].name;
+	function getDefaultSortingMode(): { mode: SortingMode, column: TableColumn } {
+		return {
+			mode: SortingMode.DESCENDING,
+			column: tableData.columns[0],
+		};
 	}
 
 	function sort() {
@@ -48,52 +67,84 @@
 			return;
 		}
 
+		if (tableData.sortingMode.mode === SortingMode.NONE) {
+			tableData.sortingMode = getDefaultSortingMode();
+		}
+
 		console.log(tableData.sortingMode);
 
 		tableData.entries.sort((a, b) => {
-			if (tableData.sortingMode?.mode === SortingMode.ASCENDING) {
-				return -1 * a[tableData.sortingMode?.column].localeCompare(b[tableData.sortingMode?.column]);
-			} else {
-				return a[tableData.sortingMode?.column].localeCompare(b[tableData.sortingMode?.column]);
+			if (!tableData.sortingMode) {
+				return 0;
 			}
-		})
+
+			if (tableData.sortingMode.mode === SortingMode.ASCENDING) {
+				return -1 * compareTableEntriesByColumns(a, b, tableData.sortingMode.column);
+			} else if (tableData.sortingMode.mode === SortingMode.DESCENDING) {
+				return compareTableEntriesByColumns(a, b, tableData.sortingMode.column);
+			} else {
+				return 0;
+			}
+		});
 
 		// tell svelte to update
+		updateClusterize();
+		view.saveTable();
 		tableData = tableData;
+	}
+
+	function updateClusterize() {
+		clusterizeRows = [];
+
+		for (const entry of tableData.entries) {
+			let str = '<tr class="db-plugin-tb-row">';
+
+			for (const column of tableData.columns) {
+				str += `<td class="db-plugin-tb-cell">${entry[column.name]}</td>`;
+			}
+
+			str += '</tr>';
+			clusterizeRows.push(str);
+		}
+
+		clusterize?.update(clusterizeRows);
+	}
+
+	function editColumn(event: CustomEvent) {
+		const column = event.detail.column;
+
+		const editModal = new SimpleColumnEditModal(
+			view.app,
+			column,
+			updatedColumn => {
+				const index = tableData.columns.indexOf(column);
+				tableData.columns[index] = updatedColumn;
+				if (tableData.sortingMode && tableData.sortingMode.column === column) {
+					tableData.sortingMode.column = updatedColumn;
+					sort();
+				} else {
+					view.saveTable();
+				}
+			},
+			() => {
+			},
+		);
+
+		editModal.open();
 	}
 </script>
 
-<table class="db-plugin-table">
-	<thead class="db-plugin-th">
-	<tr class="db-plugin-th-row">
-		{#each tableData.columns as column}
-			<th class="db-plugin-th-cell">
-				<div class="db-plugin-th-cell-content">
-					<span class="db-plugin-th-cell-content-text">{column.name}</span>
-					<div class="db-plugin-clickable-icon-wrapper" on:click={() => setSortingMode(column)}>
-						{#if tableData.sortingMode?.column === column.name && tableData.sortingMode?.mode === SortingMode.DESCENDING}
-							<Icon class="db-plugin-th-cell-content-icon" iconName="chevron-down"></Icon>
-						{:else if tableData.sortingMode?.column === column.name && tableData.sortingMode?.mode === SortingMode.ASCENDING}
-							<Icon class="db-plugin-th-cell-content-icon" iconName="chevron-up"></Icon>
-						{:else}
-							<Icon class="db-plugin-th-cell-content-icon" iconName="chevrons-up-down"></Icon>
-						{/if}
-					</div>
-					<div class="db-plugin-clickable-icon-wrapper">
-						<Icon class="db-plugin-th-cell-content-icon" iconName="more-vertical"></Icon>
-					</div>
-				</div>
-			</th>
-		{/each}
-	</tr>
-	</thead>
-	<tbody class="db-plugin-tb">
-	{#each tableData.entries as entry}
-		<tr class="db-plugin-tb-row">
-			{#each tableData.columns as column}
-				<td class="db-plugin-tb-cell">{entry[column.name]}</td>
-			{/each}
-		</tr>
-	{/each}
-	</tbody>
-</table>
+<div class="clusterize">
+	<div class="clusterize-scroll" bind:this={clusterizeScrollElement}>
+		<table class="db-plugin-table">
+			<TableHeaderComponent bind:tableData={tableData} on:editColumn={editColumn}
+								  on:cycleSortingMode={cycleSortingMode}></TableHeaderComponent>
+			<tbody class="db-plugin-tb clusterize-content" bind:this={clusterizeContentElement}>
+			<tr class="clusterize-no-data">
+				<td>Loading data…</td>
+			</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
+

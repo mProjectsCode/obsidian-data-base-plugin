@@ -1,7 +1,8 @@
 import { Plugin } from 'obsidian';
 import { DBPluginSettings, DBPluginSettingTab, DEFAULT_SETTINGS } from './settings/Settings';
-import { CSVView } from './CSVView';
+import { TableView } from './views/TableView';
 import { TableParser } from './utils/TableParser';
+import { AdvancedTableView } from './views/AdvancedTableView';
 
 // Remember to rename these classes and interfaces!
 
@@ -16,8 +17,10 @@ export default class DBPlugin extends Plugin {
 
 		this.tableParser = new TableParser();
 
-		this.registerView(CSVView.type, leaf => new CSVView(this, leaf));
-		this.registerExtensions(['csv'], CSVView.type);
+		this.registerView(TableView.type, leaf => new TableView(this, leaf));
+		this.registerExtensions(['csv'], TableView.type);
+		this.registerView(AdvancedTableView.type, leaf => new AdvancedTableView(this, leaf));
+		this.registerExtensions(['csvdb'], AdvancedTableView.type);
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new DBPluginSettingTab(this.app, this));
