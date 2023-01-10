@@ -38,10 +38,10 @@ export class SimpleColumnEditModal extends Modal {
 		columnDataTypeSetting.setName('Column Data Type');
 		columnDataTypeSetting.setDesc('Change the data type of the Column');
 		columnDataTypeSetting.addDropdown(component => {
-			component.setValue(this.columnConfig.dataType);
 			for (const dataType of Object.values(TableColumnDataType)) {
 				component.addOption(dataType, dataType);
 			}
+			component.setValue(this.columnConfig.dataType);
 			component.onChange(value => {
 				this.columnConfig.dataType = value as TableColumnDataType;
 			});

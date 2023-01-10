@@ -60,6 +60,10 @@ export class TableParser {
 
 	stringifyCSVCell(cell: string): string {
 		const specialCharacters = [',', '\n', '\r', '"'];
+		if (!cell) {
+			return '';
+		}
+
 		for (const specialCharacter of specialCharacters) {
 			if (cell.contains(specialCharacter)) {
 				return `"${cell}"`;

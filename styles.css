@@ -94,11 +94,30 @@
 	background: var(--background-modifier-hover);
 }
 
+.db-plugin-table-toolbar {
+	display: flex;
+	flex-direction: row;
+	gap: var(--size-4-2);
+	margin-block: var(--size-4-2);
+}
+
+.db-plugin-table-search-bar {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: var(--size-4-1);
+	flex: 1;
+}
+
 .db-plugin-table-pagination {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
-	gap: var(--size-4-1)
+	gap: var(--size-4-1);
+}
+
+.db-plugin-table-pagination > input[type=number] {
+	width: 50px;
 }
 
 .db-plugin-file-header {
@@ -113,3 +132,4 @@
 .db-plugin-file-content {
 	margin-inline: var(--size-4-2);
 }
+

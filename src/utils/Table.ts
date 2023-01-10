@@ -1,6 +1,7 @@
 import { TFile } from 'obsidian';
 import {compareTableEntriesByColumns} from './Utils';
 import {SimpleColumnEditModal} from '../modals/SimpleColumnEditModal';
+import {DeleteConfirmModal} from '../modals/DeleteConfirmModal';
 
 /**
  * TableData models the underlying (CSV) file
@@ -39,6 +40,7 @@ export type TableEntryId = string;
 export interface TableConfig {
 	sortingConfig: SortingConfig;
 	columnConfig: TableColumnConfig[];
+	entriesPerPage: number;
 	file: string;
 }
 
@@ -72,6 +74,7 @@ export const DEFAULT_SORTING_CONFIG: SortingConfig = {
 export const DEFAULT_TABLE_CONFIG: TableConfig = {
 	sortingConfig: DEFAULT_SORTING_CONFIG,
 	columnConfig: [],
+	entriesPerPage: 500,
 	file: '',
 }
 
@@ -260,7 +263,7 @@ export class Table {
 		this.notifyConfigChangeListeners();
 	}
 
-	editColumnWithModal(columnId: TableColumnId) {
+	editColumnWithModal(columnId: TableColumnId): void {
 		const column: TableColumn | undefined = this.getColumnById(columnId);
 
 		if (!column) {
@@ -286,5 +289,24 @@ export class Table {
 		});
 
 		editModal.open();
+	}
+
+	deleteColumnWithModal(columnId: TableColumnId): void {
+		const column: TableColumn | undefined = this.getColumnById(columnId);
+
+		if (!column) {
+			throw new Error(`can not edit column '${columnId}'. A column with this id does not exist.`);
+		}
+
+		new DeleteConfirmModal(
+			app,
+			'column',
+			() => {
+				console.log('TODO: delete column');
+			},
+			() => {}
+		).open();
+
+
 	}
 }

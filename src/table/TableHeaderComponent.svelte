@@ -2,6 +2,8 @@
 	import Icon from '../utils/Icon.svelte';
 	import {SortingMode, Table, TableColumn} from '../utils/Table';
 	import {onMount} from 'svelte';
+	import {Menu} from 'obsidian';
+	import {DeleteConfirmModal} from '../modals/DeleteConfirmModal';
 
 	export let table: Table;
 
@@ -15,9 +17,39 @@
 		})
 	})
 
-	function editColumn(column: TableColumn) {
-		table.editColumnWithModal(column.id);
-	}
+function showColumnActionsMenu(event: MouseEvent, column: TableColumn) {
+	new Menu()
+		.addItem(item => {
+			item.setTitle('Add Column to Left');
+			item.setIcon('align-horizontal-justify-start');
+			item.onClick(() => {
+				console.log('TODO: add column to left');
+			});
+		})
+		.addItem(item => {
+			item.setTitle('Add Column to Right');
+			item.setIcon('align-horizontal-justify-end');
+			item.onClick(() => {
+				console.log('TODO: add column to right');
+			});
+		})
+		.addSeparator()
+		.addItem(item => {
+			item.setTitle('Edit');
+			item.setIcon('edit');
+			item.onClick(() => {
+				table.editColumnWithModal(column.id);
+			});
+		})
+		.addItem(item => {
+			item.setTitle('Delete');
+			item.setIcon('trash');
+			item.onClick(() => {
+				table.deleteColumnWithModal(column.id);
+			});
+		})
+		.showAtMouseEvent(event);
+}
 
 	function cycleSortingMode(column: TableColumn) {
 		table.cycleSortingModeForColumn(column);
@@ -42,7 +74,7 @@
 						<Icon class="db-plugin-th-cell-content-icon" iconName="chevrons-up-down"></Icon>
 					{/if}
 				</div>
-				<div class="db-plugin-clickable-icon-wrapper" on:click={() => editColumn(column)}>
+				<div class="db-plugin-clickable-icon-wrapper" on:click={(event) => showColumnActionsMenu(event, column)}>
 					<Icon class="db-plugin-th-cell-content-icon" iconName="more-vertical"></Icon>
 				</div>
 			</div>
