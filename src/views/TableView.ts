@@ -1,15 +1,15 @@
 import { WorkspaceLeaf } from 'obsidian';
 import DBPlugin from '../main';
-import TableComponent from '../table/TableComponent.svelte';
-import { TableData } from '../utils/TableParser';
+import TableComponent from '../table/FastTableComponent.svelte';
 import { AbstractTableView } from './AbstractTableView';
+import {DEFAULT_TABLE_CONFIG, RawTableData, Table, TableData} from '../utils/Table';
 
 export class TableView extends AbstractTableView {
 	static type: string = 'db-plugin-csv-view';
 
 	plugin: DBPlugin;
 	// @ts-ignore
-	tableData: TableData;
+	table: Table;
 
 	constructor(plugin: DBPlugin, leaf: WorkspaceLeaf) {
 		super(leaf);
@@ -26,19 +26,20 @@ export class TableView extends AbstractTableView {
 
 	public getViewData(): string {
 		console.log('get view data');
-		return this.plugin.tableParser.stringifyCSV(this.tableData);
+		return this.plugin.tableParser.stringifyCSV(this.table.tableData);
 	}
 
 	public setViewData(data: string, clear: boolean): void {
 		console.log('set view data');
-		this.tableData = this.plugin.tableParser.parseCSV(data);
+		const tableData: TableData = this.plugin.tableParser.parseCSV(data);
+		this.table = new Table(tableData, DEFAULT_TABLE_CONFIG);
 
 		this.contentEl.empty();
 		new TableComponent({
 			target: this.contentEl,
 			props: {
 				view: this,
-				tableData: this.tableData,
+				table: this.table,
 			},
 		});
 	}

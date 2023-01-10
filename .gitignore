@@ -31,3 +31,5 @@ exampleVault/.obsidian/*
 exampleVault/.obsidian/plugins/*
 exampleVault/.obsidian/plugins/obsidian-meta-bind-plugin/*
 !exampleVault/.obsidian/plugins/obsidian-meta-bind-plugin/.hotreload
+
+exampleVault/organizations-500000.csv

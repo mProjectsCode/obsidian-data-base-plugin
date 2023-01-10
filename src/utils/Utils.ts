@@ -1,5 +1,5 @@
 import { ParserUtils } from '@opd-libs/opd-utils-lib/lib/ParserUtils';
-import { TableColumn, TableColumnDataType, TableEntry } from './TableParser';
+import {RawTableColumn, TableColumnDataType, RawTableEntry, TableEntry, TableColumn, TableColumnConfig} from './Table';
 
 export function trimString(str: string, trimString: string): string {
 	if (!str || !trimString || str.length < trimString.length) {
@@ -33,13 +33,13 @@ export function compareNumbers(a: number, b: number): number {
 	return a - b;
 }
 
-export function compareTableEntriesByColumns(a: TableEntry, b: TableEntry, column: TableColumn): number {
-	const aValue: string = a[column.name];
-	const bValue: string = b[column.name];
+export function compareTableEntriesByColumns(a: TableEntry, b: TableEntry, columnConfig: TableColumnConfig): number {
+	const aValue: string = a.data[columnConfig.columnId];
+	const bValue: string = b.data[columnConfig.columnId];
 
-	if (column.dataType === TableColumnDataType.STRING) {
+	if (columnConfig.dataType === TableColumnDataType.STRING) {
 		return compareStrings(aValue, bValue);
-	} else if (column.dataType === TableColumnDataType.NUMBER) {
+	} else if (columnConfig.dataType === TableColumnDataType.NUMBER) {
 		const aNum: number = parseInt(aValue);
 		const bNum: number = parseInt(bValue);
 

@@ -2,21 +2,15 @@ import { TFile, WorkspaceLeaf } from 'obsidian';
 import DBPlugin from '../main';
 import InteractiveTableComponent from '../table/InteractiveTableComponent.svelte';
 import AdvancedTableHeaderComponent from '../table/AdvancedTableHeaderComponent.svelte';
-import { TableData } from '../utils/TableParser';
 import { AbstractTableView } from './AbstractTableView';
-
-export interface AdvancedTableSettings {
-	file: string;
-}
+import {DEFAULT_TABLE_CONFIG, RawTableData, Table, TableConfig, TableData} from '../utils/Table';
 
 export class AdvancedTableView extends AbstractTableView {
 	static type: string = 'db-plugin-advanced-table-view';
 
 	plugin: DBPlugin;
 	// @ts-ignore
-	tableData: TableData;
-	// @ts-ignore
-	tableSettings: AdvancedTableSettings;
+	table: Table;
 	// @ts-ignore
 	tableContainerEl: HTMLElement;
 	// @ts-ignore
@@ -37,17 +31,16 @@ export class AdvancedTableView extends AbstractTableView {
 
 	public getViewData(): string {
 		console.log('get view data');
-		return JSON.stringify(this.tableSettings);
+		return JSON.stringify(this.table.tableConfig);
 	}
 
 	public setViewData(data: string, clear: boolean): void {
 		console.log('set view data');
+		const tableConfig: TableConfig = DEFAULT_TABLE_CONFIG;
+
 		if (data) {
-			this.tableSettings = JSON.parse(data);
-		} else {
-			this.tableSettings = {
-				file: '',
-			};
+			Object.assign(tableConfig, JSON.parse(data));
+			console.log(tableConfig);
 		}
 
 		this.contentEl.empty();
@@ -57,42 +50,52 @@ export class AdvancedTableView extends AbstractTableView {
 			target: this.settingsContainerEl,
 			props: {
 				view: this,
-				tableSettings: this.tableSettings,
+				tableConfig: tableConfig,
 			},
 		});
 
 		this.tableContainerEl = this.contentEl.createDiv({ cls: 'db-plugin-file-content' });
 		this.tableContainerEl.createEl('p', { text: `loading data...` });
 
-		this.loadTable();
+		this.loadTable(tableConfig);
 	}
 
-	public async loadTable(): Promise<void> {
-		const file = this.app.vault.getAbstractFileByPath(this.tableSettings.file);
+	public async loadTable(tableConfig: TableConfig): Promise<void> {
+		const file = this.app.vault.getAbstractFileByPath(tableConfig.file);
 		if (!(file instanceof TFile)) {
 			this.tableContainerEl.empty();
-			this.tableContainerEl.createEl('p', { text: `invalid file path: ${this.tableSettings.file}` });
+			this.tableContainerEl.createEl('p', { text: `invalid file path: ${tableConfig.file}` });
 			return;
 		}
 		const fileContent: string = await this.app.vault.cachedRead(file);
-		this.tableData = this.plugin.tableParser.parseCSV(fileContent);
+		const tableData: TableData = this.plugin.tableParser.parseCSV(fileContent);
+
+		this.table = new Table(tableData, tableConfig);
+
+		this.table.addDataChangeListener(() => {
+			this.saveTable();
+		});
+
+		this.table.addConfigChangeListener(() => {
+			this.save();
+		});
 
 		this.tableContainerEl.empty();
 		new InteractiveTableComponent({
 			target: this.tableContainerEl,
 			props: {
 				view: this,
-				tableData: this.tableData,
+				table: this.table,
 			},
 		});
 	}
 
 	public async saveTable(): Promise<void> {
-		const csvString = this.plugin.tableParser.stringifyCSV(this.tableData);
+		const csvString = this.plugin.tableParser.stringifyCSV(this.table.tableData);
 
-		const file = this.app.vault.getAbstractFileByPath(this.tableSettings.file);
+		const file = this.app.vault.getAbstractFileByPath(this.table.tableConfig.file);
 		if (!file) {
-			await this.app.vault.create(this.tableSettings.file, csvString);
+			await this.app.vault.create(this.table.tableConfig.file, csvString);
 			return;
 		} else if (file instanceof TFile) {
 			await this.app.vault.modify(file, csvString);

@@ -1,16 +1,19 @@
 import { App, Modal, Setting } from 'obsidian';
-import { TableColumn, TableColumnDataType } from '../utils/TableParser';
+import {RawTableColumn, TableColumn, TableColumnConfig, TableColumnDataType} from '../utils/Table';
 
 export class SimpleColumnEditModal extends Modal {
 	column: TableColumn;
-	onSubmit: (column: TableColumn) => void;
+	columnConfig: TableColumnConfig;
+	onSubmit: (column: TableColumn, columnConfig: TableColumnConfig) => void;
 	onCancel: () => void;
 
-	constructor(app: App, column: TableColumn, onSubmit: (column: TableColumn) => void, onCancel: () => void) {
+	constructor(app: App, column: TableColumn, columnConfig: TableColumnConfig, onSubmit: (column: TableColumn, columnConfig: TableColumnConfig) => void, onCancel: () => void) {
 		super(app);
 
 		// deep copy
 		this.column = JSON.parse(JSON.stringify(column));
+		this.columnConfig = JSON.parse(JSON.stringify(columnConfig));
+
 		this.onSubmit = onSubmit;
 		this.onCancel = onCancel;
 	}
@@ -35,12 +38,12 @@ export class SimpleColumnEditModal extends Modal {
 		columnDataTypeSetting.setName('Column Data Type');
 		columnDataTypeSetting.setDesc('Change the data type of the Column');
 		columnDataTypeSetting.addDropdown(component => {
-			component.setValue(this.column.dataType);
+			component.setValue(this.columnConfig.dataType);
 			for (const dataType of Object.values(TableColumnDataType)) {
 				component.addOption(dataType, dataType);
 			}
 			component.onChange(value => {
-				this.column.dataType = value as TableColumnDataType;
+				this.columnConfig.dataType = value as TableColumnDataType;
 			});
 		});
 
@@ -49,7 +52,7 @@ export class SimpleColumnEditModal extends Modal {
 			component.setButtonText('Apply');
 			component.setCta();
 			component.onClick(() => {
-				this.onSubmit(this.column);
+				this.onSubmit(this.column, this.columnConfig);
 				this.close();
 			});
 		});

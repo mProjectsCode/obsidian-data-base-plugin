@@ -1,21 +1,27 @@
 <script lang="ts">
-	import {AdvancedTableSettings, AdvancedTableView} from '../views/AdvancedTableView';
+	import { AdvancedTableView} from '../views/AdvancedTableView';
 	import {TextFieldModal} from '../modals/TextFieldModal';
+	import {Table, TableConfig} from '../utils/Table';
+	import {onMount} from 'svelte';
 
-	export let tableSettings: AdvancedTableSettings;
+	export let tableConfig: TableConfig;
 	export let view: AdvancedTableView;
+
+	onMount(() => {
+
+	})
 
 	function editFilePath() {
 		const modal = new TextFieldModal(
 			view.app,
-			tableSettings.file,
+			tableConfig.file,
 			'Edit CSV File Path',
 			'CSV File Path',
 			'',
 			value => {
-				tableSettings.file = value;
+				tableConfig.file = value;
 				view.save();
-				view.loadTable();
+				view.loadTable(tableConfig);
 			},
 			() => {
 			},
@@ -37,7 +43,7 @@
 <div>
 	<div class="db-plugin-file-header">
 		<div class="flex-row">
-			<span>{tableSettings.file}</span>
+			<span>{tableConfig.file}</span>
 			<button class="btn" on:click={editFilePath}>Edit</button>
 		</div>
 	</div>
