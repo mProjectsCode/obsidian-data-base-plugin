@@ -1,5 +1,5 @@
 import { ParserUtils } from '@opd-libs/opd-utils-lib/lib/ParserUtils';
-import {RawTableColumn, TableColumnDataType, RawTableEntry, TableEntry, TableColumn, TableColumnConfig} from './Table';
+import { TableColumnConfig, TableColumnDataType, TableEntry } from './Table';
 
 export function trimString(str: string, trimString: string): string {
 	if (!str || !trimString || str.length < trimString.length) {

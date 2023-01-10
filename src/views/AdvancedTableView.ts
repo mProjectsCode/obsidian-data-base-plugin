@@ -1,9 +1,8 @@
 import { TFile, WorkspaceLeaf } from 'obsidian';
 import DBPlugin from '../main';
-import InteractiveTableComponent from '../table/InteractiveTableComponent.svelte';
-import AdvancedTableHeaderComponent from '../table/AdvancedTableHeaderComponent.svelte';
+import AdvancedTableViewComponent from '../table/AdvancedTableViewComponent.svelte';
 import { AbstractTableView } from './AbstractTableView';
-import {DEFAULT_TABLE_CONFIG, RawTableData, Table, TableConfig, TableData} from '../utils/Table';
+import { DEFAULT_TABLE_CONFIG, Table, TableConfig, TableData } from '../utils/Table';
 
 export class AdvancedTableView extends AbstractTableView {
 	static type: string = 'db-plugin-advanced-table-view';
@@ -12,9 +11,7 @@ export class AdvancedTableView extends AbstractTableView {
 	// @ts-ignore
 	table: Table;
 	// @ts-ignore
-	tableContainerEl: HTMLElement;
-	// @ts-ignore
-	settingsContainerEl: HTMLElement;
+	advancedTableViewComponent: AdvancedTableViewComponent;
 
 	constructor(plugin: DBPlugin, leaf: WorkspaceLeaf) {
 		super(leaf);
@@ -44,18 +41,14 @@ export class AdvancedTableView extends AbstractTableView {
 		}
 
 		this.contentEl.empty();
-		this.settingsContainerEl = this.contentEl.createDiv();
 
-		new AdvancedTableHeaderComponent({
-			target: this.settingsContainerEl,
+		this.advancedTableViewComponent = new AdvancedTableViewComponent({
+			target: this.contentEl,
 			props: {
 				view: this,
 				tableConfig: tableConfig,
 			},
 		});
-
-		this.tableContainerEl = this.contentEl.createDiv({ cls: 'db-plugin-file-content' });
-		this.tableContainerEl.createEl('p', { text: `loading data...` });
 
 		this.loadTable(tableConfig);
 	}
@@ -63,8 +56,7 @@ export class AdvancedTableView extends AbstractTableView {
 	public async loadTable(tableConfig: TableConfig): Promise<void> {
 		const file = this.app.vault.getAbstractFileByPath(tableConfig.file);
 		if (!(file instanceof TFile)) {
-			this.tableContainerEl.empty();
-			this.tableContainerEl.createEl('p', { text: `invalid file path: ${tableConfig.file}` });
+			this.advancedTableViewComponent.setError(`invalid file path: ${tableConfig.file}`);
 			return;
 		}
 		const fileContent: string = await this.app.vault.cachedRead(file);
@@ -80,14 +72,7 @@ export class AdvancedTableView extends AbstractTableView {
 			this.save();
 		});
 
-		this.tableContainerEl.empty();
-		new InteractiveTableComponent({
-			target: this.tableContainerEl,
-			props: {
-				view: this,
-				table: this.table,
-			},
-		});
+		this.advancedTableViewComponent.setTable(this.table);
 	}
 
 	public async saveTable(): Promise<void> {

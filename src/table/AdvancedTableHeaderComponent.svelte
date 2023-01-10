@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { AdvancedTableView} from '../views/AdvancedTableView';
+	import {AdvancedTableView} from '../views/AdvancedTableView';
 	import {TextFieldModal} from '../modals/TextFieldModal';
-	import {Table, TableConfig} from '../utils/Table';
+	import {TableConfig} from '../utils/Table';
 	import {onMount} from 'svelte';
 
 	export let tableConfig: TableConfig;
@@ -9,7 +9,7 @@
 
 	onMount(() => {
 
-	})
+	});
 
 	function editFilePath() {
 		const modal = new TextFieldModal(
@@ -40,11 +40,10 @@
 	}
 </style>
 
-<div>
-	<div class="db-plugin-file-header">
-		<div class="flex-row">
-			<span>{tableConfig.file}</span>
-			<button class="btn" on:click={editFilePath}>Edit</button>
-		</div>
+
+<div class="db-plugin-file-header">
+	<div class="flex-row">
+		<span>{tableConfig.file}</span>
+		<button class="btn" on:click={editFilePath}>Edit</button>
 	</div>
 </div>

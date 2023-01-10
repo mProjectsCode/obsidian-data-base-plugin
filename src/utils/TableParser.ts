@@ -1,7 +1,7 @@
 import { EnclosingPair, ParserUtils } from '@opd-libs/opd-utils-lib/lib/ParserUtils';
 import { isTruthy } from '@opd-libs/opd-utils-lib/lib/Utils';
 import { trimString } from './Utils';
-import { TableColumn, TableColumnDataType, TableData, TableEntry } from './Table';
+import { TableColumn, TableData, TableEntry } from './Table';
 
 export class TableParser {
 	parseCSV(data: string): TableData {

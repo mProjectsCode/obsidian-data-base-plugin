@@ -26,11 +26,11 @@
 
 		table.addDataChangeListener(() => {
 			table.tableData = table.tableData;
-		})
+		});
 
 		table.addConfigChangeListener(() => {
 			table.tableConfig = table.tableConfig;
-		})
+		});
 	});
 
 	function updateClusterize() {

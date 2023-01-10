@@ -2,7 +2,7 @@ import { WorkspaceLeaf } from 'obsidian';
 import DBPlugin from '../main';
 import TableComponent from '../table/FastTableComponent.svelte';
 import { AbstractTableView } from './AbstractTableView';
-import {DEFAULT_TABLE_CONFIG, RawTableData, Table, TableData} from '../utils/Table';
+import { DEFAULT_TABLE_CONFIG, Table, TableData } from '../utils/Table';
 
 export class TableView extends AbstractTableView {
 	static type: string = 'db-plugin-csv-view';

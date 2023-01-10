@@ -1,6 +1,6 @@
 <script lang="ts">
 
-	import {onMount, tick} from 'svelte';
+	import {onMount} from 'svelte';
 	import viewport from '../utils/UseViewportAction';
 
 	class Chunk {
@@ -106,12 +106,12 @@
 	let chunks: Chunk[] = [];
 	let firstSubChunkHeight: number = -1;
 
-	const initialChunkHeight =  20 * SubChunk.entriesPerSubChunk * Chunk.subChunksPerChunk;
+	const initialChunkHeight = 20 * SubChunk.entriesPerSubChunk * Chunk.subChunksPerChunk;
 	const initialSubChunkHeight = 20 * SubChunk.entriesPerSubChunk;
 
 	onMount(() => {
 		createChunks();
-	})
+	});
 
 	function createChunks() {
 		const entriesPerChunk = SubChunk.entriesPerSubChunk * Chunk.subChunksPerChunk;
@@ -128,7 +128,7 @@
 	function updateHeights(): void {
 		firstSubChunkHeight = chunks[0].subChunks[0].el.clientHeight;
 		console.log(firstSubChunkHeight, 'first sub chunk height');
-		console.log( chunks[0].subChunks[0].el, 'subchunk');
+		console.log(chunks[0].subChunks[0].el, 'subchunk');
 		for (const chunk of chunks) {
 			if (chunk.index === 0) {
 				for (const subChunk of chunk.subChunks) {
@@ -143,33 +143,33 @@
 </script>
 
 <tbody>
-	{#each chunks as chunk}
-		<tr
-			use:viewport
-			on:enterViewport={() => {chunk.setVisible(true); chunk.visible = chunk.visible}}
-			on:exitViewport={() => {chunk.setVisible(false); chunk.visible = chunk.visible}}
-			style="min-height: {chunk.getInitialHeight()}px"
-			bind:this={chunk.el}
-		>
-			{#if chunk.visible}
-				{#each chunk.subChunks as subChunk}
-					<tr
-						use:viewport
-						on:enterViewport={() => {subChunk.setVisible(true); chunk.visible = chunk.visible}}
-						on:exitViewport={() => {subChunk.setVisible(false); chunk.visible = chunk.visible}}
-						style="min-height: {subChunk.getInitialHeight()}px"
-						bind:this={subChunk.el}
-					>
-						{#if subChunk.visible}
-							{#each subChunk.entries as entry}
-								<tr bind:this={entry.el}>
-									<slot entry={entry.entry}></slot>
-								</tr>
-							{/each}
-						{/if}
-					</tr>
-				{/each}
-			{/if}
-		</tr>
-	{/each}
+{#each chunks as chunk}
+	<tr
+		use:viewport
+		on:enterViewport={() => {chunk.setVisible(true); chunk.visible = chunk.visible}}
+		on:exitViewport={() => {chunk.setVisible(false); chunk.visible = chunk.visible}}
+		style="min-height: {chunk.getInitialHeight()}px"
+		bind:this={chunk.el}
+	>
+		{#if chunk.visible}
+			{#each chunk.subChunks as subChunk}
+				<tr
+					use:viewport
+					on:enterViewport={() => {subChunk.setVisible(true); chunk.visible = chunk.visible}}
+					on:exitViewport={() => {subChunk.setVisible(false); chunk.visible = chunk.visible}}
+					style="min-height: {subChunk.getInitialHeight()}px"
+					bind:this={subChunk.el}
+				>
+					{#if subChunk.visible}
+						{#each subChunk.entries as entry}
+							<tr bind:this={entry.el}>
+								<slot entry={entry.entry}></slot>
+							</tr>
+						{/each}
+					{/if}
+				</tr>
+			{/each}
+		{/if}
+	</tr>
+{/each}
 </tbody>

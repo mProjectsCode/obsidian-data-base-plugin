@@ -1,5 +1,5 @@
 import { App, Modal, Setting } from 'obsidian';
-import {RawTableColumn, TableColumn, TableColumnConfig, TableColumnDataType} from '../utils/Table';
+import { TableColumn, TableColumnConfig, TableColumnDataType } from '../utils/Table';
 
 export class SimpleColumnEditModal extends Modal {
 	column: TableColumn;

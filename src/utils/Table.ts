@@ -1,7 +1,7 @@
 import { TFile } from 'obsidian';
-import {compareTableEntriesByColumns} from './Utils';
-import {SimpleColumnEditModal} from '../modals/SimpleColumnEditModal';
-import {DeleteConfirmModal} from '../modals/DeleteConfirmModal';
+import { compareTableEntriesByColumns } from './Utils';
+import { SimpleColumnEditModal } from '../modals/SimpleColumnEditModal';
+import { DeleteConfirmModal } from '../modals/DeleteConfirmModal';
 
 /**
  * TableData models the underlying (CSV) file
@@ -21,15 +21,15 @@ export interface TableData {
 }
 
 export interface TableColumn {
-	name: RawTableColumn,
-	id: TableColumnId,
+	name: RawTableColumn;
+	id: TableColumnId;
 }
 
 export type TableColumnId = string;
 
 export interface TableEntry {
-	data: RawTableEntry
-	id: TableEntryId,
+	data: RawTableEntry;
+	id: TableEntryId;
 }
 
 export type TableEntryId = string;
@@ -69,14 +69,14 @@ export enum TableColumnDataType {
 export const DEFAULT_SORTING_CONFIG: SortingConfig = {
 	column: '',
 	mode: SortingMode.DESCENDING,
-}
+};
 
 export const DEFAULT_TABLE_CONFIG: TableConfig = {
 	sortingConfig: DEFAULT_SORTING_CONFIG,
 	columnConfig: [],
 	entriesPerPage: 500,
 	file: '',
-}
+};
 
 export class Table {
 	tableData: TableData;
@@ -84,8 +84,8 @@ export class Table {
 
 	file?: TFile;
 
-	dataUpdateListeners: { id: string, callback: (tableData: TableData) => void}[];
-	configUpdateListeners: { id: string, callback: (tableConfig: TableConfig) => void}[];
+	dataUpdateListeners: { id: string; callback: (tableData: TableData) => void }[];
+	configUpdateListeners: { id: string; callback: (tableConfig: TableConfig) => void }[];
 
 	constructor(tableData: TableData, tableConfig: TableConfig) {
 		this.tableData = tableData;
@@ -96,26 +96,26 @@ export class Table {
 			const columnConfigIndex = this.getColumnConfigIndexByName(column.name);
 
 			if (columnConfigIndex === -1) {
-				newColumnConfig.push({columnId: column.id, columnName: column.name, dataType: TableColumnDataType.STRING})
+				newColumnConfig.push({ columnId: column.id, columnName: column.name, dataType: TableColumnDataType.STRING });
 			} else {
-				newColumnConfig.push({columnId: column.id, columnName: column.name, dataType: this.tableConfig.columnConfig[columnConfigIndex].dataType})
+				newColumnConfig.push({ columnId: column.id, columnName: column.name, dataType: this.tableConfig.columnConfig[columnConfigIndex].dataType });
 			}
 		}
 		this.tableConfig.columnConfig = newColumnConfig;
 
 		this.dataUpdateListeners = [];
-		this.configUpdateListeners = []
+		this.configUpdateListeners = [];
 	}
 
 	addDataChangeListener(callback: (tableData: TableData) => void): string {
 		const id = crypto.randomUUID();
-		this.dataUpdateListeners.push({id: id, callback: callback});
+		this.dataUpdateListeners.push({ id: id, callback: callback });
 		return id;
 	}
 
 	addConfigChangeListener(callback: (tableConfig: TableConfig) => void): string {
 		const id = crypto.randomUUID();
-		this.configUpdateListeners.push({id: id, callback: callback});
+		this.configUpdateListeners.push({ id: id, callback: callback });
 		return id;
 	}
 
@@ -176,7 +176,7 @@ export class Table {
 
 		const columnConfig: TableColumnConfig | undefined = this.getColumnConfigById(this.tableConfig.sortingConfig.column);
 		if (!columnConfig) {
-			console.warn(new Error(`can not sort column by column id '${this.tableConfig.sortingConfig.column}'. A column with this id does not exist.`))
+			console.warn(new Error(`can not sort column by column id '${this.tableConfig.sortingConfig.column}'. A column with this id does not exist.`));
 			return;
 		}
 
@@ -184,7 +184,7 @@ export class Table {
 			if (this.tableConfig.sortingConfig.mode === SortingMode.ASCENDING) {
 				return -1 * compareTableEntriesByColumns(a, b, columnConfig);
 			} else if (this.tableConfig.sortingConfig.mode === SortingMode.DESCENDING) {
-				return compareTableEntriesByColumns(a, b,columnConfig);
+				return compareTableEntriesByColumns(a, b, columnConfig);
 			} else {
 				return 0;
 			}
@@ -276,17 +276,22 @@ export class Table {
 			throw new Error(`can not edit column '${columnId}'. A column config with this id does not exist.`);
 		}
 
-		const editModal = new SimpleColumnEditModal(app, column, columnConfig, (updatedColumn, updatedColumnConfig ) => {
-			this.updateColumn(column.id, updatedColumn);
-			this.updateColumnConfig(column.id, updatedColumnConfig);
+		const editModal = new SimpleColumnEditModal(
+			app,
+			column,
+			columnConfig,
+			(updatedColumn, updatedColumnConfig) => {
+				this.updateColumn(column.id, updatedColumn);
+				this.updateColumnConfig(column.id, updatedColumnConfig);
 
-			console.log(updatedColumn, updatedColumnConfig);
+				console.log(updatedColumn, updatedColumnConfig);
 
-			if (this.tableConfig.sortingConfig.column === column.id) {
-				this.sort();
-			}
-		}, () => {
-		});
+				if (this.tableConfig.sortingConfig.column === column.id) {
+					this.sort();
+				}
+			},
+			() => {}
+		);
 
 		editModal.open();
 	}
@@ -306,7 +311,5 @@ export class Table {
 			},
 			() => {}
 		).open();
-
-
 	}
 }

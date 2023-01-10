@@ -1,13 +1,9 @@
 <script lang="ts">
-	import Icon from '../utils/Icon.svelte';
 	import {onMount} from 'svelte';
 	import TableHeaderComponent from './TableHeaderComponent.svelte';
 	import {AbstractTableView} from '../views/AbstractTableView';
-	import {
-		Table,
-		TableColumn, TableColumnId,
-		TableEntry,
-	} from '../utils/Table';
+	import {Table, TableColumnId, TableEntry} from '../utils/Table';
+	import TablePaginationComponent from './TablePaginationComponent.svelte';
 
 	export let table: Table;
 	export let view: AbstractTableView;
@@ -25,11 +21,11 @@
 
 		table.addDataChangeListener(() => {
 			table.tableData = table.tableData;
-		})
+		});
 
 		table.addConfigChangeListener(() => {
 			table.tableConfig = table.tableConfig;
-		})
+		});
 	});
 
 	function calculateVisibleEntries(): void {
@@ -47,33 +43,21 @@
 	}
 </script>
 
-<div>
-	<div class="db-plugin-table-toolbar">
-		<div class="db-plugin-table-search-bar">
-			<input type="text" bind:value={searchTerm} placeholder="search">
-			<select class="dropdown" bind:value={searchColumn} on:change={() => searchTerm = ''}>
-				{#each table.tableData.columns as column}
-					<option value={column.id}>{column.name}</option>
-				{/each}
-			</select>
-			<button class="btn">Search</button>
-		</div>
-		<div class="db-plugin-table-pagination">
-			<span>Page</span>
-			<div class="db-plugin-clickable-icon-wrapper" style="display: inline"
-				 on:click={() => page = Math.max(page - 1, 1)}>
-				<Icon class="db-plugin-th-cell-content-icon" iconName="chevron-left"></Icon>
-			</div>
-			<input type="number" bind:value={page}>
-			<div class="db-plugin-clickable-icon-wrapper" style="display: inline"
-				 on:click={() => page = Math.min(page + 1, getNumberOfPages())}>
-				<Icon class="db-plugin-th-cell-content-icon" iconName="chevron-right"></Icon>
-			</div>
-			<span>out of {getNumberOfPages()}</span>
-		</div>
+
+<div class="db-plugin-table-toolbar">
+	<div class="db-plugin-table-search-bar">
+		<input type="text" bind:value={searchTerm} placeholder="search">
+		<select class="dropdown" bind:value={searchColumn} on:change={() => searchTerm = ''}>
+			{#each table.tableData.columns as column}
+				<option value={column.id}>{column.name}</option>
+			{/each}
+		</select>
+		<button class="btn">Search</button>
 	</div>
+	<TablePaginationComponent bind:page={page} numberOfPages={getNumberOfPages()}></TablePaginationComponent>
+</div>
 
-
+<div class="db-plugin-table-wrapper">
 	<table class="db-plugin-table">
 		<TableHeaderComponent bind:table={table}></TableHeaderComponent>
 
