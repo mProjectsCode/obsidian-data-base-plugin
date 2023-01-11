@@ -59,6 +59,7 @@ export interface TableColumnConfig {
 	columnId: TableColumnId;
 	columnName: string;
 	dataType: TableColumnDataType;
+	width: number;
 }
 
 export enum TableColumnDataType {
@@ -96,9 +97,21 @@ export class Table {
 			const columnConfigIndex = this.getColumnConfigIndexByName(column.name);
 
 			if (columnConfigIndex === -1) {
-				newColumnConfig.push({ columnId: column.id, columnName: column.name, dataType: TableColumnDataType.STRING });
+				newColumnConfig.push({
+					columnId: column.id,
+					columnName: column.name,
+					dataType: TableColumnDataType.STRING,
+					width: 150,
+				});
 			} else {
-				newColumnConfig.push({ columnId: column.id, columnName: column.name, dataType: this.tableConfig.columnConfig[columnConfigIndex].dataType });
+				const oldColumnConfig: TableColumnConfig = this.tableConfig.columnConfig[columnConfigIndex]
+
+				newColumnConfig.push({
+					columnId: column.id,
+					columnName: column.name,
+					dataType: oldColumnConfig.dataType ?? TableColumnDataType.STRING,
+					width: oldColumnConfig.width ?? 150,
+				});
 			}
 		}
 		this.tableConfig.columnConfig = newColumnConfig;
@@ -128,12 +141,14 @@ export class Table {
 	}
 
 	notifyDataChangeListeners(): void {
+		console.debug('notifying data change listeners');
 		for (const tableDataUpdateCallback of this.dataUpdateListeners) {
 			tableDataUpdateCallback.callback(this.tableData);
 		}
 	}
 
 	notifyConfigChangeListeners(): void {
+		console.debug('notifying config change listeners');
 		for (const tableConfigUpdateCallbacks of this.configUpdateListeners) {
 			tableConfigUpdateCallbacks.callback(this.tableConfig);
 		}
@@ -311,5 +326,17 @@ export class Table {
 			},
 			() => {}
 		).open();
+	}
+
+	setColumnWidth(columnId: TableColumnId, width: number) {
+		const columnConfigIndex: number = this.getColumnConfigIndexById(columnId);
+
+		if (columnConfigIndex === -1) {
+			throw new Error(`can not edit column '${columnId}'. A column config with this id does not exist.`);
+		}
+
+		this.tableConfig.columnConfig[columnConfigIndex].width = width;
+
+		this.notifyConfigChangeListeners();
 	}
 }

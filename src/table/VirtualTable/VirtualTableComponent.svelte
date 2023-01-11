@@ -1,6 +1,7 @@
 <script lang="ts">
 	import viewport from 'src/utils/UseViewportAction';
 	import {onMount, tick} from 'svelte';
+	import {fade} from 'svelte/transition';
 
 	// @ts-ignore
 	type T = $$Generic;
@@ -138,6 +139,8 @@
 	const initialChunkHeight = entryHeight * SubChunk.entriesPerSubChunk * Chunk.subChunksPerChunk;
 	const initialSubChunkHeight = entryHeight * SubChunk.entriesPerSubChunk;
 
+	const fadeAnimation = (node, args) => fade(node, args);
+
 	onMount(() => {
 		createChunks();
 	});
@@ -216,9 +219,13 @@
 							{#each subChunk.entries as entry}
 								<slot name="entry" entry={entry.entry}></slot>
 							{/each}
+						{:else}
+							<span></span>
 						{/if}
 					</div>
 				{/each}
+			{:else}
+				<span></span>
 			{/if}
 		</div>
 	{/each}

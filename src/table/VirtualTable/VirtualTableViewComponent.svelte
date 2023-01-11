@@ -1,20 +1,32 @@
 <script lang="ts">
 	import {AbstractTableView} from '../../views/AbstractTableView';
-	import {Table} from '../../utils/Table';
+	import {Table, TableColumnId} from '../../utils/Table';
 	import VirtualTableComponent from './VirtualTableComponent.svelte';
+	import VirtualTableHeaderComponent from './VirtualTableHeaderComponent.svelte';
+	import {onMount} from 'svelte';
 
 	export let table: Table;
 	export let view: AbstractTableView;
 
+	let columnWidths: Record<TableColumnId, number> = {};
+
+	onMount(() => {
+		columnWidths = {};
+		for (const tableColumnConfig of table.tableConfig.columnConfig) {
+			columnWidths[tableColumnConfig.columnId] = tableColumnConfig.width;
+		}
+	})
+
 </script>
 
+<VirtualTableHeaderComponent bind:table={table} bind:columnWidths={columnWidths}></VirtualTableHeaderComponent>
 <VirtualTableComponent
 	entries={table.tableData.entries}
 	debug={true}
 >
 	<div class="db-plugin-tb-row" slot="entry" let:entry={entry}>
 		{#each table.tableData.columns as column}
-			<div class="db-plugin-tb-cell">
+			<div class="db-plugin-tb-cell" style={`width: ${columnWidths[column.id]}px`}>
 				{entry.data[column.id]}
 			</div>
 		{/each}

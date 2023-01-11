@@ -1,5 +1,5 @@
 <script lang="ts">
-	import AdvancedTableHeaderComponent from './AdvancedTableHeaderComponent.svelte';
+	import AdvancedTableHeaderComponent from './AdvancedTableViewHeaderComponent.svelte';
 	import {Table, TableConfig} from '../utils/Table';
 	import {AdvancedTableView} from '../views/AdvancedTableView';
 	import InteractiveTableComponent from './InteractiveTableComponent.svelte';

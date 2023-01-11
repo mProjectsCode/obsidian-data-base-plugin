@@ -5,6 +5,8 @@
 	import {Table, TableColumnId, TableEntry} from '../utils/Table';
 	import TablePaginationComponent from './TablePaginationComponent.svelte';
 	import {clamp} from '../utils/Utils';
+	import VirtualTableComponent from './VirtualTable/VirtualTableComponent.svelte';
+	import VirtualTableHeaderComponent from './VirtualTable/VirtualTableHeaderComponent.svelte';
 
 	export let table: Table;
 	export let view: AbstractTableView;
@@ -14,6 +16,8 @@
 
 	let searchTerm: string;
 	let searchColumn: TableColumnId = table.tableData.columns[0].id;
+
+	let columnWidths: Record<TableColumnId, number> = {};
 
 	$: page, table.tableData.entries, calculateVisibleEntries();
 
@@ -27,6 +31,11 @@
 		table.addConfigChangeListener(() => {
 			table.tableConfig = table.tableConfig;
 		});
+
+		columnWidths = {};
+		for (const tableColumnConfig of table.tableConfig.columnConfig) {
+			columnWidths[tableColumnConfig.columnId] = tableColumnConfig.width;
+		}
 	});
 
 	function calculateVisibleEntries(): void {
@@ -59,21 +68,19 @@
 </div>
 
 <div class="db-plugin-table-wrapper">
-	<table class="db-plugin-table">
-		<TableHeaderComponent bind:table={table}></TableHeaderComponent>
-
-		<tbody class="db-plugin-tb">
-		{#each visibleEntries as entry}
-			<tr class="db-plugin-tb-row">
-				{#each table.tableData.columns as column}
-					<td class="db-plugin-tb-cell">
-						{entry.data[column.id]}
-					</td>
-				{/each}
-			</tr>
-		{/each}
-		</tbody>
-	</table>
+	<VirtualTableHeaderComponent bind:table={table} bind:columnWidths={columnWidths}></VirtualTableHeaderComponent>
+	<VirtualTableComponent
+		entries={table.tableData.entries}
+		debug={true}
+	>
+		<div class="db-plugin-tb-row" slot="entry" let:entry={entry}>
+			{#each table.tableData.columns as column}
+				<div class="db-plugin-tb-cell" style={`width: ${columnWidths[column.id]}px`}>
+					{entry.data[column.id]}
+				</div>
+			{/each}
+		</div>
+	</VirtualTableComponent>
 </div>
 
 

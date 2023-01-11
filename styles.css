@@ -1,3 +1,7 @@
+body {
+	--db-plugin-default-column-width: 150px;
+}
+
 .theme-dark {
 	--db-plugin-background-modifier-hover-light: rgba(255, 255, 255, 0.0375);
 }
@@ -33,15 +37,18 @@
 }
 
 .db-plugin-th {
-
-}
-
-.db-plugin-th-row {
-
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	width: fit-content;
+	border-bottom: 1px solid var(--color-base-50);
 }
 
 .db-plugin-th-cell {
+	width: var(--db-plugin-default-column-width);
+	flex-shrink: 0;
 	padding: var(--size-4-2);
+	display: flex;
 }
 
 .db-plugin-th-cell-content {
@@ -64,8 +71,21 @@
 	color: var(--text-faint);
 }
 
-.db-plugin-th-cell-content-icon {
+.db-plugin-th-cell-resize-handle {
+	position: relative;
+	left: var(--size-4-2);
+	width: var(--size-2-2);
+	height: 100%;
+	border-radius: 1px;
+}
 
+.db-plugin-th-cell-resize-handle:hover {
+	background-color: var(--interactive-accent);
+	cursor: ew-resize;
+}
+
+.db-plugin-th-cell-resize-handle.db-plugin-th-cell-resize-handle-active {
+	background-color: var(--interactive-accent-hover);
 }
 
 .db-plugin-tb {
@@ -74,18 +94,14 @@
 
 .db-plugin-tb-row {
 	border-bottom: 1px solid var(--background-modifier-border);
-}
-
-.db-plugin-tb-row:first-child {
-	border-top: 1px solid var(--background-modifier-border);
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	width: fit-content;
 }
 
 .db-plugin-tb-row:hover {
 	border-bottom: 1px solid var(--color-base-50);
-}
-
-.db-plugin-tb-row:first-child:hover {
-	border-top: 1px solid var(--color-base-50);
 }
 
 .db-plugin-tb-row:has(+ .db-plugin-tb-row:hover) {
@@ -93,8 +109,13 @@
 }
 
 .db-plugin-tb-cell {
-	display: inline;
+	width: var(--db-plugin-default-column-width);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	display: block;
 	padding: var(--size-4-2);
+	flex-shrink: 0;
 }
 
 .db-plugin-tb-cell:hover {

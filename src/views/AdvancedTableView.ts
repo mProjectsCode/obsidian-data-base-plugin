@@ -95,5 +95,7 @@ export class AdvancedTableView extends AbstractTableView {
 
 	protected async onOpen(): Promise<void> {}
 
-	protected async onClose(): Promise<void> {}
+	protected async onClose(): Promise<void> {
+		this.advancedTableViewComponent.$destroy();
+	}
 }

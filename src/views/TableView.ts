@@ -10,6 +10,8 @@ export class TableView extends AbstractTableView {
 	plugin: DBPlugin;
 	// @ts-ignore
 	table: Table;
+	// @ts-ignore
+	tableComponent: TableComponent;
 
 	constructor(plugin: DBPlugin, leaf: WorkspaceLeaf) {
 		super(leaf);
@@ -35,7 +37,7 @@ export class TableView extends AbstractTableView {
 		this.table = new Table(tableData, DEFAULT_TABLE_CONFIG);
 
 		this.contentEl.empty();
-		new TableComponent({
+		this.tableComponent = new TableComponent({
 			target: this.contentEl,
 			props: {
 				view: this,
@@ -54,5 +56,7 @@ export class TableView extends AbstractTableView {
 
 	protected async onOpen(): Promise<void> {}
 
-	protected async onClose(): Promise<void> {}
+	protected async onClose(): Promise<void> {
+		this.tableComponent.$destroy();
+	}
 }
