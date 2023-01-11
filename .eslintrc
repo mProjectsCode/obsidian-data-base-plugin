@@ -4,7 +4,13 @@
 	"env": {
 		"node": true
 	},
-	"plugins": ["@typescript-eslint", "only-warn"],
+	"plugins": ["@typescript-eslint", "only-warn", "svelte3"],
+	"overrides": [
+		{
+			"files": ["*.svelte"],
+			"processor": "svelte3/svelte3"
+		}
+	],
 	"extends": ["eslint:recommended", "plugin:@typescript-eslint/eslint-recommended", "plugin:@typescript-eslint/recommended"],
 	"parserOptions": {
 		"sourceType": "module"
@@ -18,5 +24,8 @@
 		"@typescript-eslint/no-inferrable-types": "off",
 		"@typescript-eslint/no-explicit-any": "off",
 		"@typescript-eslint/explicit-function-return-type": ["warn"]
+	},
+	"settings": {
+		"svelte3/typescript": true
 	}
 }

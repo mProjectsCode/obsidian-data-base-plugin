@@ -28,6 +28,7 @@
 		"esbuild-plugin-copy-watch": "^0.0.7",
 		"esbuild-svelte": "^0.7.1",
 		"eslint-plugin-only-warn": "^1.0.3",
+		"eslint-plugin-svelte3": "^4.0.0",
 		"jest": "^28.1.1",
 		"jest-environment-jsdom": "^28.1.1",
 		"obsidian": "latest",

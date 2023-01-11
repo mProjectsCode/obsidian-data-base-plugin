@@ -1,6 +1,6 @@
 import { WorkspaceLeaf } from 'obsidian';
 import DBPlugin from '../main';
-import TableComponent from '../table/FastTableComponent.svelte';
+import TableComponent from '../table/VirtualTable/VirtualTableViewComponent.svelte';
 import { AbstractTableView } from './AbstractTableView';
 import { DEFAULT_TABLE_CONFIG, Table, TableData } from '../utils/Table';
 

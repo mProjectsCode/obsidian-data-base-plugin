@@ -29,7 +29,7 @@
 
 .db-plugin-table {
 	border-collapse: collapse;
-	transform: rotateX(0deg); /* force hardware acceleration */
+	/* transform: rotateX(0deg);  force hardware acceleration */
 }
 
 .db-plugin-th {
@@ -93,6 +93,7 @@
 }
 
 .db-plugin-tb-cell {
+	display: inline;
 	padding: var(--size-4-2);
 }
 

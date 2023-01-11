@@ -4,6 +4,7 @@
 	import {AbstractTableView} from '../views/AbstractTableView';
 	import {Table, TableColumnId, TableEntry} from '../utils/Table';
 	import TablePaginationComponent from './TablePaginationComponent.svelte';
+	import {clamp} from '../utils/Utils';
 
 	export let table: Table;
 	export let view: AbstractTableView;
@@ -33,7 +34,7 @@
 			visibleEntries = [];
 			return;
 		}
-		page = Math.clamp(page, 1, getNumberOfPages());
+		page = clamp(page, 1, getNumberOfPages());
 		visibleEntries = table.tableData.entries.slice((page - 1) * table.tableConfig.entriesPerPage, Math.min(page * table.tableConfig.entriesPerPage, table.tableData.entries.length));
 		// console.log(visibleEntries);
 	}

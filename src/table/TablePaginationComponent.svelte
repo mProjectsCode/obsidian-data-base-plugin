@@ -13,7 +13,7 @@
 		style="display: inline"
 		on:click={() => page = Math.max(page - 1, 1)}
 	>
-		<Icon class="db-plugin-th-cell-content-icon" iconName="chevron-left"></Icon>
+		<Icon iconName="chevron-left"></Icon>
 	</div>
 	<input type="number" bind:value={page}>
 	<div
@@ -21,7 +21,7 @@
 		style="display: inline"
 		on:click={() => page = Math.min(page + 1, numberOfPages)}
 	>
-		<Icon class="db-plugin-th-cell-content-icon" iconName="chevron-right"></Icon>
+		<Icon iconName="chevron-right"></Icon>
 	</div>
 	<span>out of {numberOfPages}</span>
 </div>

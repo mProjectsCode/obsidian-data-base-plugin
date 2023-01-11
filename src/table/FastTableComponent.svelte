@@ -9,7 +9,7 @@
 	export let view: AbstractTableView;
 
 	let clusterizeRows: string[] = [];
-	let clusterize;
+	let clusterize: any;
 	let clusterizeScrollElement: HTMLElement;
 	let clusterizeContentElement: HTMLElement;
 

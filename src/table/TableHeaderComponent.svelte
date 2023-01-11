@@ -67,16 +67,16 @@
 				</div>
 				<div class="db-plugin-clickable-icon-wrapper" on:click={() => cycleSortingMode(column)}>
 					{#if table.tableConfig.sortingConfig.column === column.id && table.tableConfig.sortingConfig.mode === SortingMode.DESCENDING}
-						<Icon class="db-plugin-th-cell-content-icon" iconName="chevron-down"></Icon>
+						<Icon iconName="chevron-down"></Icon>
 					{:else if table.tableConfig.sortingConfig.column === column.id && table.tableConfig.sortingConfig.mode === SortingMode.ASCENDING}
-						<Icon class="db-plugin-th-cell-content-icon" iconName="chevron-up"></Icon>
+						<Icon iconName="chevron-up"></Icon>
 					{:else}
-						<Icon class="db-plugin-th-cell-content-icon" iconName="chevrons-up-down"></Icon>
+						<Icon iconName="chevrons-up-down"></Icon>
 					{/if}
 				</div>
 				<div class="db-plugin-clickable-icon-wrapper"
 					 on:click={(event) => showColumnActionsMenu(event, column)}>
-					<Icon class="db-plugin-th-cell-content-icon" iconName="more-vertical"></Icon>
+					<Icon iconName="more-vertical"></Icon>
 				</div>
 			</div>
 		</th>

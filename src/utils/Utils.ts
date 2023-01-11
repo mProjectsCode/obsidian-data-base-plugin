@@ -55,3 +55,7 @@ export function compareTableEntriesByColumns(a: TableEntry, b: TableEntry, colum
 		return 0;
 	}
 }
+
+export function clamp(value: number, min: number, max: number): number {
+	return Math.clamp(value, min, max);
+}

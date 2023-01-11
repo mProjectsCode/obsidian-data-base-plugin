@@ -1,7 +1,7 @@
-import { TFile } from 'obsidian';
-import { compareTableEntriesByColumns } from './Utils';
-import { SimpleColumnEditModal } from '../modals/SimpleColumnEditModal';
-import { DeleteConfirmModal } from '../modals/DeleteConfirmModal';
+import {TFile} from 'obsidian';
+import {compareTableEntriesByColumns} from './Utils';
+import {SimpleColumnEditModal} from '../modals/SimpleColumnEditModal';
+import {DeleteConfirmModal} from '../modals/DeleteConfirmModal';
 
 /**
  * TableData models the underlying (CSV) file
