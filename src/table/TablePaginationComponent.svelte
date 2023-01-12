@@ -1,8 +1,24 @@
+<!--DEPRECATED-->
+
 <script lang="ts">
 	import Icon from '../utils/Icon.svelte';
 
 	export let page: number;
 	export let numberOfPages: number;
+
+	// function calculateVisibleEntries(): void {
+	// 	if (!page) {
+	// 		visibleEntries = [];
+	// 		return;
+	// 	}
+	// 	page = clamp(page, 1, getNumberOfPages());
+	// 	visibleEntries = table.tableData.entries.slice((page - 1) * table.tableConfig.entriesPerPage, Math.min(page * table.tableConfig.entriesPerPage, table.tableData.entries.length));
+	// 	// console.log(visibleEntries);
+	// }
+	//
+	// function getNumberOfPages(): number {
+	// 	return Math.ceil(table.tableData.entries.length / table.tableConfig.entriesPerPage);
+	// }
 
 </script>
 

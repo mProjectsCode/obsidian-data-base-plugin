@@ -54,9 +54,12 @@ export class TableView extends AbstractTableView {
 		this.data = '';
 	}
 
-	protected async onOpen(): Promise<void> {}
+	protected async onOpen(): Promise<void> {
+		console.log('table view opened');
+	}
 
 	protected async onClose(): Promise<void> {
-		this.tableComponent.$destroy();
+		console.log('table view closed');
+		this.tableComponent?.$destroy();
 	}
 }

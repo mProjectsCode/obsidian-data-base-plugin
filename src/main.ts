@@ -1,8 +1,8 @@
-import {Plugin} from 'obsidian';
-import {DBPluginSettings, DBPluginSettingTab, DEFAULT_SETTINGS} from './settings/Settings';
-import {TableView} from './views/TableView';
-import {TableParser} from './utils/TableParser';
-import {AdvancedTableView} from './views/AdvancedTableView';
+import { Plugin } from 'obsidian';
+import { DBPluginSettings, DBPluginSettingTab, DEFAULT_SETTINGS } from './settings/Settings';
+import { TableView } from './views/TableView';
+import { TableParser } from './utils/TableParser';
+import { AdvancedTableView } from './views/AdvancedTableView';
 
 // Remember to rename these classes and interfaces!
 

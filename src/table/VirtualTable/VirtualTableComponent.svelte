@@ -1,32 +1,35 @@
 <script lang="ts">
 	import viewport from 'src/utils/UseViewportAction';
 	import {onMount, tick} from 'svelte';
-	import {fade} from 'svelte/transition';
-	import exp = require('constants');
 
 	// @ts-ignore
 	type T = $$Generic;
 
 	class Chunk {
-		static subChunksPerChunk = 50;
+		index: number;
 
+		el?: HTMLElement;
 		height: number = -1;
+
 		subChunks: SubChunk[];
+		numberOfEntries: number;
+
 		visible: boolean;
 		wasVisible: boolean;
-		index: number;
-		el?: HTMLElement;
 
 		constructor(index: number, entries: T[], visible: boolean) {
 			this.index = index;
 			this.subChunks = [];
 			this.visible = visible;
 			this.wasVisible = false;
+			this.numberOfEntries = entries.length;
 
-			for (let i = 0; i < Chunk.subChunksPerChunk; i++) {
+			const numSubChunks = Math.ceil(entries.length / entriesPerSubChunk);
+
+			for (let i = 0; i < numSubChunks; i++) {
 				let entriesFroSubChunk: T[] = [];
-				if (i * SubChunk.entriesPerSubChunk <= entries.length) {
-					entriesFroSubChunk = entries.slice(i * SubChunk.entriesPerSubChunk, Math.min((i + 1) * SubChunk.entriesPerSubChunk, entries.length));
+				if (i * entriesPerSubChunk <= entries.length) {
+					entriesFroSubChunk = entries.slice(i * entriesPerSubChunk, Math.min((i + 1) * entriesPerSubChunk, entries.length));
 				}
 				this.subChunks.push(new SubChunk(index, i, entriesFroSubChunk, i <= 1));
 			}
@@ -41,7 +44,9 @@
 
 			this.height = this.getElHeight();
 
-			this.el.style.minHeight = `0px`;
+			if (!fixedHeight) {
+				this.el.style.minHeight = `${visibleMinHeight}px`;
+			}
 			this.wasVisible = true;
 		}
 
@@ -50,7 +55,9 @@
 				throw new Error(`error in turning chunk ${this.index} invisible, el is undefined`);
 			}
 
-			this.el.style.minHeight = `${this.height}px`;
+			if (!fixedHeight) {
+				this.el.style.minHeight = `${this.height}px`;
+			}
 		}
 
 		getElHeight(): number {
@@ -65,20 +72,26 @@
 				throw new Error(`error in changing chunk ${this.index} height, el is undefined`);
 			}
 
-			this.el.style.minHeight = `${getChunkHeightGuess()}px`;
+			this.el.style.minHeight = `${this.getHeightGuess()}px`;
+		}
+
+		getHeightGuess(): number {
+			return getSubChunkHeightGuess() * subChunksPerChunk * (this.numberOfEntries / (entriesPerSubChunk * subChunksPerChunk));
 		}
 	}
 
 	class SubChunk {
-		static entriesPerSubChunk = 50;
-
-		height: number = -1;
-		entries: { entry: T, el?: HTMLElement }[];
-		visible: boolean;
-		wasVisible: boolean;
 		index: number;
 		chunkIndex: number;
+
 		el?: HTMLElement;
+		height: number = -1;
+
+		entries: { entry: T, el?: HTMLElement }[];
+		numberOfEntries: number;
+
+		visible: boolean;
+		wasVisible: boolean;
 
 		constructor(chunkIndex: number, index: number, entries: T[], visible: boolean) {
 			this.chunkIndex = chunkIndex;
@@ -87,6 +100,7 @@
 			this.visible = visible;
 			this.wasVisible = false;
 			this.entries = entries.map(x => ({entry: x, el: undefined}));
+			this.numberOfEntries = entries.length;
 		}
 
 		async onTurnVisible() {
@@ -97,11 +111,13 @@
 			await tick();
 
 			this.height = this.getElHeight();
-			if (this.index === 0 && this.chunkIndex === 0 && !this.wasVisible) {
+			if (this.index === 0 && this.chunkIndex === 0 && !this.wasVisible && !fixedHeight) {
 				updateHeightGuesses(this.height);
 			}
 
-			this.el.style.minHeight = `0px`;
+			if (!fixedHeight) {
+				this.el.style.minHeight = `${visibleMinHeight}px`;
+			}
 			this.wasVisible = true;
 		}
 
@@ -110,7 +126,9 @@
 				throw new Error(`error in turning sub chunk ${this.chunkIndex} ${this.index} invisible, el is undefined`);
 			}
 
-			this.el.style.minHeight = `${this.height}px`;
+			if (!fixedHeight) {
+				this.el.style.minHeight = `${this.height}px`;
+			}
 		}
 
 		getElHeight(): number {
@@ -120,29 +138,34 @@
 			return this.el.clientHeight;
 		}
 
-		setHeightToHeightGuess() {
+		setHeightToHeightGuess(): void {
 			if (!this.el) {
 				throw new Error(`error in changing sub chunk ${this.chunkIndex} ${this.index} height, el is undefined`);
 			}
 
-			this.el.style.minHeight = `${getSubChunkHeightGuess()}px`;
+			this.el.style.minHeight = `${this.getHeightGuess()}px`;
+		}
+
+		getHeightGuess(): number {
+			return getSubChunkHeightGuess() * (this.numberOfEntries / entriesPerSubChunk);
 		}
 	}
 
 	export let entries: T[] = [];
+
+	export let subChunksPerChunk: number = 50;
+	export let entriesPerSubChunk: number = 50;
+
 	export let fixedHeight: boolean = false;
 	export let entryHeight: number = 20;
+
 	export let debug: boolean = false;
 
 	export const update = () => createChunks();
 
 	let chunks: Chunk[] = [];
 	let firstSubChunkHeight: number = -1;
-
-	const initialChunkHeight = entryHeight * SubChunk.entriesPerSubChunk * Chunk.subChunksPerChunk;
-	const initialSubChunkHeight = entryHeight * SubChunk.entriesPerSubChunk;
-
-	const fadeAnimation = (node, args) => fade(node, args);
+	const visibleMinHeight: number = 1;
 
 	onMount(() => {
 		createChunks();
@@ -152,7 +175,7 @@
 		chunks = [];
 		firstSubChunkHeight = -1;
 
-		const entriesPerChunk = SubChunk.entriesPerSubChunk * Chunk.subChunksPerChunk;
+		const entriesPerChunk = entriesPerSubChunk * subChunksPerChunk;
 		const numChunks = Math.ceil(entries.length / entriesPerChunk);
 
 		if (debug) {
@@ -182,7 +205,9 @@
 		for (const chunk of chunks) {
 			if (chunk.visible) {
 				for (const subChunk of chunk.subChunks) {
-					subChunk.setHeightToHeightGuess();
+					if (!subChunk.visible) {
+						subChunk.setHeightToHeightGuess();
+					}
 				}
 			} else {
 				chunk.setHeightToHeightGuess();
@@ -190,12 +215,8 @@
 		}
 	}
 
-	function getChunkHeightGuess(): number {
-		return getSubChunkHeightGuess() * Chunk.subChunksPerChunk;
-	}
-
 	function getSubChunkHeightGuess(): number {
-		return firstSubChunkHeight === -1 ? entryHeight * SubChunk.entriesPerSubChunk : firstSubChunkHeight;
+		return fixedHeight || firstSubChunkHeight === -1 ? entryHeight * entriesPerSubChunk : firstSubChunkHeight;
 	}
 </script>
 
@@ -209,7 +230,7 @@
 			use:viewport
 			on:enterViewport={() => {chunk.visible = true; chunk.onTurnVisible()}}
 			on:exitViewport={() => {chunk.visible = false; chunk.onTurnInvisible()}}
-			style="min-height: {getChunkHeightGuess()}px; width: fit-content;"
+			style="min-height: {chunk.getHeightGuess()}px; width: fit-content;"
 			bind:this={chunk.el}
 		>
 			{#if chunk.visible}
@@ -218,7 +239,7 @@
 						use:viewport
 						on:enterViewport={() => {subChunk.visible = true; subChunk.onTurnVisible()}}
 						on:exitViewport={() => {subChunk.visible = false; subChunk.onTurnInvisible()}}
-						style="min-height: {getSubChunkHeightGuess()}px; width: fit-content;"
+						style="min-height: {subChunk.getHeightGuess()}px; width: fit-content;"
 						bind:this={subChunk.el}
 					>
 						{#if subChunk.visible}

@@ -1,3 +1,5 @@
+<!--DEPRECATED-->
+
 <script lang="ts">
 	import {onMount} from 'svelte';
 	import * as Clusterize from 'clusterize.js';

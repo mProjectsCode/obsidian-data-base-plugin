@@ -6,6 +6,7 @@
 
 	export let table: Table;
 	export let columnWidths: Record<TableColumnId, number> = {};
+	export let allowEdits: boolean = true;
 
 	let dragStartPos: number = -1;
 	let dragInitialWidth: number = -1;
@@ -27,14 +28,14 @@
 				item.setTitle('Add Column to Left');
 				item.setIcon('align-horizontal-justify-start');
 				item.onClick(() => {
-					console.log('TODO: add column to left');
+					table.createColumnToTheLeft(column.id);
 				});
 			})
 			.addItem(item => {
 				item.setTitle('Add Column to Right');
 				item.setIcon('align-horizontal-justify-end');
 				item.onClick(() => {
-					console.log('TODO: add column to right');
+					table.createColumnToTheRight(column.id);
 				});
 			})
 			.addSeparator()
@@ -113,11 +114,15 @@
 					<Icon iconName="chevrons-up-down"></Icon>
 				{/if}
 			</div>
-			<div class="db-plugin-clickable-icon-wrapper"
-				 on:click={(event) => showColumnActionsMenu(event, column)}>
-				<Icon iconName="more-vertical"></Icon>
-			</div>
-			<span class={`db-plugin-th-cell-resize-handle ${dragColumnId === column.id ? 'db-plugin-th-cell-resize-handle-active' : ''}`} on:mousedown={event => startDrag(event, column.id)}></span>
+			{#if allowEdits}
+				<div class="db-plugin-clickable-icon-wrapper"
+					 on:click={(event) => showColumnActionsMenu(event, column)}>
+					<Icon iconName="more-vertical"></Icon>
+				</div>
+			{/if}
+			<span
+				class={`db-plugin-th-cell-resize-handle ${dragColumnId === column.id ? 'db-plugin-th-cell-resize-handle-active' : ''}`}
+				on:mousedown={event => startDrag(event, column.id)}></span>
 		</div>
 	{/each}
 </div>

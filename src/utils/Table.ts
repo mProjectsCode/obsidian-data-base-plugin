@@ -1,7 +1,7 @@
-import {TFile} from 'obsidian';
-import {compareTableEntriesByColumns} from './Utils';
-import {SimpleColumnEditModal} from '../modals/SimpleColumnEditModal';
-import {DeleteConfirmModal} from '../modals/DeleteConfirmModal';
+import { TFile } from 'obsidian';
+import { compareTableEntriesByColumns } from './Utils';
+import { SimpleColumnEditModal } from '../modals/SimpleColumnEditModal';
+import { DeleteConfirmModal } from '../modals/DeleteConfirmModal';
 
 /**
  * TableData models the underlying (CSV) file
@@ -13,7 +13,7 @@ export interface RawTableData {
 
 export type RawTableColumn = string;
 
-export type RawTableEntry = Record<string, string>;
+export type RawTableEntry = Record<string, string | null>;
 
 export interface TableData {
 	columns: TableColumn[];
@@ -39,7 +39,7 @@ export type TableEntryId = string;
  */
 export interface TableConfig {
 	sortingConfig: SortingConfig;
-	columnConfig: TableColumnConfig[];
+	columnConfigs: TableColumnConfig[];
 	entriesPerPage: number;
 	file: string;
 }
@@ -74,7 +74,7 @@ export const DEFAULT_SORTING_CONFIG: SortingConfig = {
 
 export const DEFAULT_TABLE_CONFIG: TableConfig = {
 	sortingConfig: DEFAULT_SORTING_CONFIG,
-	columnConfig: [],
+	columnConfigs: [],
 	entriesPerPage: 500,
 	file: '',
 };
@@ -92,32 +92,41 @@ export class Table {
 		this.tableData = tableData;
 		this.tableConfig = tableConfig;
 
+		this.initColumnConfigs(tableData);
+
+		this.dataUpdateListeners = [];
+		this.configUpdateListeners = [];
+	}
+
+	private initColumnConfigs(tableData: TableData): void {
 		const newColumnConfig: TableColumnConfig[] = [];
 		for (const column of tableData.columns) {
 			const columnConfigIndex = this.getColumnConfigIndexByName(column.name);
 
 			if (columnConfigIndex === -1) {
-				newColumnConfig.push({
-					columnId: column.id,
-					columnName: column.name,
-					dataType: TableColumnDataType.STRING,
-					width: 150,
-				});
+				newColumnConfig.push(this.createDefaultColumnConfig(column));
 			} else {
-				const oldColumnConfig: TableColumnConfig = this.tableConfig.columnConfig[columnConfigIndex]
+				const oldColumnConfig: TableColumnConfig = this.tableConfig.columnConfigs[columnConfigIndex];
+				const defaultColumnConfig: TableColumnConfig = this.createDefaultColumnConfig(column);
 
 				newColumnConfig.push({
-					columnId: column.id,
-					columnName: column.name,
-					dataType: oldColumnConfig.dataType ?? TableColumnDataType.STRING,
-					width: oldColumnConfig.width ?? 150,
+					columnId: defaultColumnConfig.columnId,
+					columnName: defaultColumnConfig.columnName,
+					dataType: oldColumnConfig.dataType ?? defaultColumnConfig.dataType,
+					width: oldColumnConfig.width ?? defaultColumnConfig.width,
 				});
 			}
 		}
-		this.tableConfig.columnConfig = newColumnConfig;
+		this.tableConfig.columnConfigs = newColumnConfig;
+	}
 
-		this.dataUpdateListeners = [];
-		this.configUpdateListeners = [];
+	private createDefaultColumnConfig(column: TableColumn): TableColumnConfig {
+		return {
+			columnId: column.id,
+			columnName: column.name,
+			dataType: TableColumnDataType.STRING,
+			width: 150,
+		};
 	}
 
 	addDataChangeListener(callback: (tableData: TableData) => void): string {
@@ -213,7 +222,7 @@ export class Table {
 	}
 
 	getColumnConfigById(id: TableColumnId): TableColumnConfig | undefined {
-		return this.tableConfig.columnConfig.find(x => x.columnId === id);
+		return this.tableConfig.columnConfigs.find(x => x.columnId === id);
 	}
 
 	getColumnIndexById(id: TableColumnId): number {
@@ -221,36 +230,20 @@ export class Table {
 	}
 
 	getColumnConfigIndexById(id: TableColumnId): number {
-		return this.tableConfig.columnConfig.findIndex(x => x.columnId === id);
+		return this.tableConfig.columnConfigs.findIndex(x => x.columnId === id);
 	}
 
 	getColumnConfigIndexByName(name: string): number {
-		return this.tableConfig.columnConfig.findIndex(x => x.columnName === name);
+		return this.tableConfig.columnConfigs.findIndex(x => x.columnName === name);
 	}
 
-	insetColumnAtEnd(column: TableColumn): void {
-		this.insertColumnAtIndex(column, this.tableData.columns.length - 1);
-	}
-
-	insertColumnToTheRight(column: TableColumn, reference: TableColumnId): void {
-		const refIndex = this.getColumnIndexById(reference);
-		if (refIndex === -1) {
-			throw new Error(`can not insert column to the right of '${reference}'. A column with this id does not exist.`);
-		}
-		this.insertColumnAtIndex(column, refIndex + 1);
-	}
-
-	insertColumnToTheLeft(column: TableColumn, reference: TableColumnId): void {
-		const refIndex = this.getColumnIndexById(reference);
-		if (refIndex === -1) {
-			throw new Error(`can not insert column to the left of '${reference}'. A column with this id does not exist.`);
-		}
-		this.insertColumnAtIndex(column, refIndex);
-	}
-
-	// TODO: update config and table entries
-	insertColumnAtIndex(column: TableColumn, index: number): void {
+	insertColumnAtIndex(column: TableColumn, columnConfig: TableColumnConfig, index: number): void {
 		this.tableData.columns.splice(index, 0, column);
+		this.tableConfig.columnConfigs.push(columnConfig);
+
+		for (const entry of this.tableData.entries) {
+			entry.data[column.id] = null;
+		}
 
 		this.notifyConfigChangeListeners();
 		this.notifyDataChangeListeners();
@@ -273,9 +266,47 @@ export class Table {
 			throw new Error(`can not update column config '${columnId}'. A column config with this id does not exist.`);
 		}
 
-		this.tableConfig.columnConfig[columnConfigIndex] = updatedColumnConfig;
+		this.tableConfig.columnConfigs[columnConfigIndex] = updatedColumnConfig;
 
 		this.notifyConfigChangeListeners();
+	}
+
+	createColumnAtEnd(): void {
+		this.createColumnAtIndexWithModal(this.tableData.columns.length - 1);
+	}
+
+	createColumnToTheRight(reference: TableColumnId): void {
+		const refIndex = this.getColumnIndexById(reference);
+		if (refIndex === -1) {
+			throw new Error(`can not insert column to the right of '${reference}'. A column with this id does not exist.`);
+		}
+		this.createColumnAtIndexWithModal(refIndex + 1);
+	}
+
+	createColumnToTheLeft(reference: TableColumnId): void {
+		const refIndex = this.getColumnIndexById(reference);
+		if (refIndex === -1) {
+			throw new Error(`can not insert column to the left of '${reference}'. A column with this id does not exist.`);
+		}
+		this.createColumnAtIndexWithModal(refIndex);
+	}
+
+	createColumnAtIndexWithModal(index: number): void {
+		const id: string = crypto.randomUUID();
+		const column: TableColumn = { name: `Column ${id}`, id: id };
+		const columnConfig: TableColumnConfig = this.createDefaultColumnConfig(column);
+
+		const editModal = new SimpleColumnEditModal(
+			app,
+			column,
+			columnConfig,
+			(updatedColumn, updatedColumnConfig) => {
+				this.insertColumnAtIndex(updatedColumn, updatedColumnConfig, index);
+			},
+			() => {}
+		);
+
+		editModal.open();
 	}
 
 	editColumnWithModal(columnId: TableColumnId): void {
@@ -299,7 +330,7 @@ export class Table {
 				this.updateColumn(column.id, updatedColumn);
 				this.updateColumnConfig(column.id, updatedColumnConfig);
 
-				console.log(updatedColumn, updatedColumnConfig);
+				// console.log(updatedColumn, updatedColumnConfig);
 
 				if (this.tableConfig.sortingConfig.column === column.id) {
 					this.sort();
@@ -312,30 +343,40 @@ export class Table {
 	}
 
 	deleteColumnWithModal(columnId: TableColumnId): void {
-		const column: TableColumn | undefined = this.getColumnById(columnId);
+		const columnIndex: number = this.getColumnIndexById(columnId);
 
-		if (!column) {
-			throw new Error(`can not edit column '${columnId}'. A column with this id does not exist.`);
+		if (columnIndex === -1) {
+			throw new Error(`can not delete column '${columnId}'. A column with this id does not exist.`);
+		}
+
+		const columnConfigIndex: number = this.getColumnConfigIndexById(columnId);
+
+		if (columnConfigIndex === -1) {
+			throw new Error(`can not delete column '${columnId}'. A column config with this id does not exist.`);
 		}
 
 		new DeleteConfirmModal(
 			app,
 			'column',
 			() => {
-				console.log('TODO: delete column');
+				this.tableData.columns.splice(columnIndex, 1);
+				this.tableConfig.columnConfigs.splice(columnConfigIndex, 1);
+
+				this.notifyConfigChangeListeners();
+				this.notifyDataChangeListeners();
 			},
 			() => {}
 		).open();
 	}
 
-	setColumnWidth(columnId: TableColumnId, width: number) {
+	setColumnWidth(columnId: TableColumnId, width: number): void {
 		const columnConfigIndex: number = this.getColumnConfigIndexById(columnId);
 
 		if (columnConfigIndex === -1) {
 			throw new Error(`can not edit column '${columnId}'. A column config with this id does not exist.`);
 		}
 
-		this.tableConfig.columnConfig[columnConfigIndex].width = width;
+		this.tableConfig.columnConfigs[columnConfigIndex].width = width;
 
 		this.notifyConfigChangeListeners();
 	}

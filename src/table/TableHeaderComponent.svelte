@@ -1,3 +1,5 @@
+<!--DEPRECATED-->
+
 <script lang="ts">
 	import Icon from '../utils/Icon.svelte';
 	import {SortingMode, Table, TableColumn} from '../utils/Table';

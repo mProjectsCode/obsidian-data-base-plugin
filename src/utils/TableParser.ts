@@ -58,8 +58,8 @@ export class TableParser {
 		return str;
 	}
 
-	stringifyCSVCell(cell: string): string {
-		const specialCharacters = [',', '\n', '\r', '"'];
+	stringifyCSVCell(cell: string | null): string {
+		const specialCharacters: string[] = [',', '\n', '\r', '"'];
 		if (!cell) {
 			return '';
 		}

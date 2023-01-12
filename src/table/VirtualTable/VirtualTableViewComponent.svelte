@@ -12,20 +12,23 @@
 	let virtualTable;
 
 	onMount(() => {
+		console.log('mounted virtual table view');
+
 		columnWidths = {};
-		for (const tableColumnConfig of table.tableConfig.columnConfig) {
+		for (const tableColumnConfig of table.tableConfig.columnConfigs) {
 			columnWidths[tableColumnConfig.columnId] = tableColumnConfig.width;
 		}
 
 		table.addDataChangeListener(() => {
 			console.log('update table');
 			virtualTable?.update();
-		})
-	})
+		});
+	});
 
 </script>
 
-<VirtualTableHeaderComponent bind:table={table} bind:columnWidths={columnWidths}></VirtualTableHeaderComponent>
+<VirtualTableHeaderComponent bind:table={table} bind:columnWidths={columnWidths}
+							 allowEdits={false}></VirtualTableHeaderComponent>
 <VirtualTableComponent
 	bind:entries={table.tableData.entries}
 	bind:this={virtualTable}
