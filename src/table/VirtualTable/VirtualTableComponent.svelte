@@ -1,3 +1,6 @@
+<!-- Made in collaboration between Moritz Jung (https://github.com/mProjectsCode) and Marcus Olsson (https://github.com/marcusolsson) -->
+<!-- Thus Marcus Olsson does not have to abide the GPL-3.0 License under which the rest of this plugin is published. -->
+
 <script lang="ts">
 	import viewport from 'src/utils/UseViewportAction';
 	import {onMount, tick} from 'svelte';
