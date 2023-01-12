@@ -93,9 +93,9 @@
 	}
 </script>
 
-<svelte:window on:mouseup={stopDrag} />
+<svelte:window on:mouseup={stopDrag} on:mousemove={updateDrag}/>
 
-<div class="db-plugin-th" on:mousemove={updateDrag}>
+<div class="db-plugin-th">
 	{#each table.tableData.columns as column}
 		<div class="db-plugin-th-cell" style={`width: ${columnWidths[column.id]}px`}>
 			<div class="db-plugin-th-cell-content-text-container">

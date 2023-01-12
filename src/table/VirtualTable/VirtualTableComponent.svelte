@@ -2,6 +2,7 @@
 	import viewport from 'src/utils/UseViewportAction';
 	import {onMount, tick} from 'svelte';
 	import {fade} from 'svelte/transition';
+	import exp = require('constants');
 
 	// @ts-ignore
 	type T = $$Generic;
@@ -27,7 +28,7 @@
 				if (i * SubChunk.entriesPerSubChunk <= entries.length) {
 					entriesFroSubChunk = entries.slice(i * SubChunk.entriesPerSubChunk, Math.min((i + 1) * SubChunk.entriesPerSubChunk, entries.length));
 				}
-				this.subChunks.push(new SubChunk(index, i, entriesFroSubChunk, i >= 1));
+				this.subChunks.push(new SubChunk(index, i, entriesFroSubChunk, i <= 1));
 			}
 		}
 
@@ -133,6 +134,8 @@
 	export let entryHeight: number = 20;
 	export let debug: boolean = false;
 
+	export const update = () => createChunks();
+
 	let chunks: Chunk[] = [];
 	let firstSubChunkHeight: number = -1;
 
@@ -146,6 +149,9 @@
 	});
 
 	function createChunks() {
+		chunks = [];
+		firstSubChunkHeight = -1;
+
 		const entriesPerChunk = SubChunk.entriesPerSubChunk * Chunk.subChunksPerChunk;
 		const numChunks = Math.ceil(entries.length / entriesPerChunk);
 
@@ -197,13 +203,13 @@
 
 </style>
 
-<div>
+<div style="width: fit-content;">
 	{#each chunks as chunk}
 		<div
 			use:viewport
 			on:enterViewport={() => {chunk.visible = true; chunk.onTurnVisible()}}
 			on:exitViewport={() => {chunk.visible = false; chunk.onTurnInvisible()}}
-			style="min-height: {getChunkHeightGuess()}px"
+			style="min-height: {getChunkHeightGuess()}px; width: fit-content;"
 			bind:this={chunk.el}
 		>
 			{#if chunk.visible}
@@ -212,7 +218,7 @@
 						use:viewport
 						on:enterViewport={() => {subChunk.visible = true; subChunk.onTurnVisible()}}
 						on:exitViewport={() => {subChunk.visible = false; subChunk.onTurnInvisible()}}
-						style="min-height: {getSubChunkHeightGuess()}px"
+						style="min-height: {getSubChunkHeightGuess()}px; width: fit-content;"
 						bind:this={subChunk.el}
 					>
 						{#if subChunk.visible}

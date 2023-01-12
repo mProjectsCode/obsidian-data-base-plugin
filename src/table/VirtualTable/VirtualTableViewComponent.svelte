@@ -9,19 +9,26 @@
 	export let view: AbstractTableView;
 
 	let columnWidths: Record<TableColumnId, number> = {};
+	let virtualTable;
 
 	onMount(() => {
 		columnWidths = {};
 		for (const tableColumnConfig of table.tableConfig.columnConfig) {
 			columnWidths[tableColumnConfig.columnId] = tableColumnConfig.width;
 		}
+
+		table.addDataChangeListener(() => {
+			console.log('update table');
+			virtualTable?.update();
+		})
 	})
 
 </script>
 
 <VirtualTableHeaderComponent bind:table={table} bind:columnWidths={columnWidths}></VirtualTableHeaderComponent>
 <VirtualTableComponent
-	entries={table.tableData.entries}
+	bind:entries={table.tableData.entries}
+	bind:this={virtualTable}
 	debug={true}
 >
 	<div class="db-plugin-tb-row" slot="entry" let:entry={entry}>
