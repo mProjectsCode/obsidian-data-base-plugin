@@ -34,8 +34,8 @@ export function compareNumbers(a: number, b: number): number {
 }
 
 export function compareTableEntriesByColumns(a: TableEntry, b: TableEntry, columnConfig: TableColumnConfig): number {
-	const aValue: string = a.data[columnConfig.columnId];
-	const bValue: string = b.data[columnConfig.columnId];
+	const aValue: string = a.data[columnConfig.columnId] ?? '';
+	const bValue: string = b.data[columnConfig.columnId] ?? '';
 
 	if (columnConfig.dataType === TableColumnDataType.STRING) {
 		return compareStrings(aValue, bValue);
@@ -58,4 +58,25 @@ export function compareTableEntriesByColumns(a: TableEntry, b: TableEntry, colum
 
 export function clamp(value: number, min: number, max: number): number {
 	return Math.clamp(value, min, max);
+}
+
+export function deepFreeze(object: object): object {
+	// Retrieve the property names defined on object
+	const propNames: (string | symbol)[] = Reflect.ownKeys(object);
+
+	// Freeze properties before freezing self
+	for (const name of propNames) {
+		// @ts-ignores
+		const value: any = object[name];
+
+		if ((value && typeof value === 'object') || typeof value === 'function') {
+			deepFreeze(value);
+		}
+	}
+
+	return Object.freeze(object);
+}
+
+export function deepCopy(object: object): object {
+	return structuredClone(object);
 }

@@ -1,5 +1,5 @@
 import { TFile } from 'obsidian';
-import { compareTableEntriesByColumns } from './Utils';
+import { compareTableEntriesByColumns, deepFreeze } from './Utils';
 import { SimpleColumnEditModal } from '../modals/SimpleColumnEditModal';
 import { DeleteConfirmModal } from '../modals/DeleteConfirmModal';
 
@@ -70,14 +70,16 @@ export enum TableColumnDataType {
 export const DEFAULT_SORTING_CONFIG: SortingConfig = {
 	column: '',
 	mode: SortingMode.DESCENDING,
-};
+} as const;
+deepFreeze(DEFAULT_SORTING_CONFIG);
 
 export const DEFAULT_TABLE_CONFIG: TableConfig = {
 	sortingConfig: DEFAULT_SORTING_CONFIG,
-	columnConfigs: [],
+	columnConfigs: [] as TableColumnConfig[],
 	entriesPerPage: 500,
 	file: '',
-};
+} as const;
+deepFreeze(DEFAULT_TABLE_CONFIG);
 
 export class Table {
 	tableData: TableData;
@@ -91,6 +93,8 @@ export class Table {
 	constructor(tableData: TableData, tableConfig: TableConfig) {
 		this.tableData = tableData;
 		this.tableConfig = tableConfig;
+
+		console.log(this);
 
 		this.initColumnConfigs(tableData);
 

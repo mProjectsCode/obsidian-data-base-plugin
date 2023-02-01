@@ -102,7 +102,8 @@
 			<div class="db-plugin-th-cell-content-text-container">
 				<span class="db-plugin-th-cell-content-text">{column.name}</span>
 				<span
-					class="db-plugin-th-cell-content-text-secondary">{table.getColumnConfigById(column.id)?.dataType}
+					class="db-plugin-th-cell-content-text-secondary">
+					{table.getColumnConfigById(column.id)?.dataType}
 				</span>
 			</div>
 			<div class="db-plugin-clickable-icon-wrapper" on:click={() => cycleSortingMode(column)}>

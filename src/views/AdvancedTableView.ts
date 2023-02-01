@@ -28,12 +28,12 @@ export class AdvancedTableView extends AbstractTableView {
 
 	public getViewData(): string {
 		console.log('get view data');
-		return JSON.stringify(this.table.tableConfig);
+		return JSON.stringify(this.table.tableConfig, undefined, 4);
 	}
 
 	public setViewData(data: string, clear: boolean): void {
 		console.log('set view data');
-		const tableConfig: TableConfig = DEFAULT_TABLE_CONFIG;
+		const tableConfig: TableConfig = structuredClone(DEFAULT_TABLE_CONFIG);
 
 		if (data) {
 			Object.assign(tableConfig, JSON.parse(data));
