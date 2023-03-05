@@ -34,7 +34,7 @@ export class TableView extends AbstractTableView {
 	public setViewData(data: string, clear: boolean): void {
 		console.log('set view data');
 		const tableData: TableData = this.plugin.tableParser.parseCSV(data);
-		this.table = new Table(tableData, structuredClone(DEFAULT_TABLE_CONFIG));
+		this.table = new Table(this.plugin, tableData, structuredClone(DEFAULT_TABLE_CONFIG));
 
 		this.contentEl.empty();
 		this.tableComponent = new TableComponent({

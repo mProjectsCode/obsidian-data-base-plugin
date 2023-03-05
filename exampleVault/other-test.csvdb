@@ -1,0 +1,28 @@
+{
+    "sortingConfig": {
+        "mode": "descending",
+        "column": "304505ea-f6d1-40b2-862e-ccb2aa3cddbd"
+    },
+    "columnConfigs": [
+        {
+            "columnId": "2474c2d6-afca-4e72-aa8a-36936134ecba",
+            "columnName": "Column 1",
+            "dataType": "string",
+            "width": 150
+        },
+        {
+            "columnId": "a33be369-2c6c-4edf-8175-a243ddc55a8e",
+            "columnName": "Column 2",
+            "dataType": "string",
+            "width": 150
+        },
+        {
+            "columnId": "bfb5cf13-a53d-4b05-a95e-84441f573643",
+            "columnName": "Column 3",
+            "dataType": "string",
+            "width": 150
+        }
+    ],
+    "entriesPerPage": 500,
+    "file": "test.csv"
+}

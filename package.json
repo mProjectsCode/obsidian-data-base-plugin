@@ -33,7 +33,7 @@
 		"jest-environment-jsdom": "^28.1.1",
 		"obsidian": "latest",
 		"prettier": "2.7.1",
-		"svelte": "^3.53.1",
+		"svelte": "^3.55.1",
 		"svelte-preprocess": "^4.10.7",
 		"ts-jest": "^28.0.5",
 		"tslib": "2.4.0",
@@ -41,6 +41,7 @@
 	},
 	"dependencies": {
 		"@opd-libs/opd-utils-lib": "0.0.2",
-		"clusterize.js": "0.18.0"
+		"clusterize.js": "0.18.0",
+		"fuzzysort": "^2.0.4"
 	}
 }

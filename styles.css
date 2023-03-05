@@ -171,3 +171,6 @@ body {
 	margin-inline: var(--size-4-2);
 }
 
+.db-plugin-highlight {
+	font-weight: bold;
+}

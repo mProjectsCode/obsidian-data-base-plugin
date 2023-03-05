@@ -32,8 +32,7 @@
 <VirtualTableComponent
 	bind:entries={table.tableData.entries}
 	bind:this={virtualTable}
-	fixedHeight={true}
-	entryHeight={36.5}
+	fixedHeight={false}
 	debug={true}
 >
 	<div class="db-plugin-tb-row" slot="entry" let:entry={entry}>

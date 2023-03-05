@@ -1,5 +1,6 @@
 import { App, Modal, Setting } from 'obsidian';
 import { TableColumn, TableColumnConfig, TableColumnDataType } from '../utils/Table';
+import { deepCopy } from '../utils/Utils';
 
 export class SimpleColumnEditModal extends Modal {
 	column: TableColumn;
@@ -11,8 +12,8 @@ export class SimpleColumnEditModal extends Modal {
 		super(app);
 
 		// deep copy
-		this.column = JSON.parse(JSON.stringify(column));
-		this.columnConfig = JSON.parse(JSON.stringify(columnConfig));
+		this.column = deepCopy(column);
+		this.columnConfig = deepCopy(columnConfig);
 
 		this.onSubmit = onSubmit;
 		this.onCancel = onCancel;
@@ -21,7 +22,6 @@ export class SimpleColumnEditModal extends Modal {
 	public onOpen(): void {
 		this.contentEl.empty();
 		this.contentEl.createEl('h2', { text: 'Edit Column' });
-		this.contentEl.createEl('p', { text: 'Changes to the column name will be saved, but not changes to the data type.' });
 
 		const columnNameSetting = new Setting(this.contentEl);
 		columnNameSetting.setName('Column Name');

@@ -56,13 +56,13 @@ export class AdvancedTableView extends AbstractTableView {
 	public async loadTable(tableConfig: TableConfig): Promise<void> {
 		const file = this.app.vault.getAbstractFileByPath(tableConfig.file);
 		if (!(file instanceof TFile)) {
-			this.advancedTableViewComponent.setError(`invalid file path: ${tableConfig.file}`);
+			this.advancedTableViewComponent.setTableError(`invalid file path: ${tableConfig.file}`);
 			return;
 		}
 		const fileContent: string = await this.app.vault.cachedRead(file);
 		const tableData: TableData = this.plugin.tableParser.parseCSV(fileContent);
 
-		this.table = new Table(tableData, tableConfig);
+		this.table = new Table(this.plugin, tableData, tableConfig);
 
 		this.table.addDataChangeListener(() => {
 			this.saveTable();

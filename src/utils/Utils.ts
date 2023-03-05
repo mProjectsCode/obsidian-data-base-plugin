@@ -60,7 +60,7 @@ export function clamp(value: number, min: number, max: number): number {
 	return Math.clamp(value, min, max);
 }
 
-export function deepFreeze(object: object): object {
+export function deepFreeze<T extends object>(object: T): T {
 	// Retrieve the property names defined on object
 	const propNames: (string | symbol)[] = Reflect.ownKeys(object);
 
@@ -77,6 +77,6 @@ export function deepFreeze(object: object): object {
 	return Object.freeze(object);
 }
 
-export function deepCopy(object: object): object {
+export function deepCopy<T extends object>(object: T): T {
 	return structuredClone(object);
 }

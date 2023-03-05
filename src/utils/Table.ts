@@ -2,6 +2,9 @@ import { TFile } from 'obsidian';
 import { compareTableEntriesByColumns, deepFreeze } from './Utils';
 import { SimpleColumnEditModal } from '../modals/SimpleColumnEditModal';
 import { DeleteConfirmModal } from '../modals/DeleteConfirmModal';
+import * as fuzzysort from 'fuzzysort';
+import DBPlugin from '../main';
+import { EntryEditModal } from '../modals/EntryEditModal';
 
 /**
  * TableData models the underlying (CSV) file
@@ -30,6 +33,8 @@ export type TableColumnId = string;
 export interface TableEntry {
 	data: RawTableEntry;
 	id: TableEntryId;
+	visible: boolean;
+	highlightedData: Record<string, string | undefined>;
 }
 
 export type TableEntryId = string;
@@ -82,6 +87,8 @@ export const DEFAULT_TABLE_CONFIG: TableConfig = {
 deepFreeze(DEFAULT_TABLE_CONFIG);
 
 export class Table {
+	plugin: DBPlugin;
+
 	tableData: TableData;
 	tableConfig: TableConfig;
 
@@ -90,7 +97,8 @@ export class Table {
 	dataUpdateListeners: { id: string; callback: (tableData: TableData) => void }[];
 	configUpdateListeners: { id: string; callback: (tableConfig: TableConfig) => void }[];
 
-	constructor(tableData: TableData, tableConfig: TableConfig) {
+	constructor(plugin: DBPlugin, tableData: TableData, tableConfig: TableConfig) {
+		this.plugin = plugin;
 		this.tableData = tableData;
 		this.tableConfig = tableConfig;
 
@@ -301,7 +309,7 @@ export class Table {
 		const columnConfig: TableColumnConfig = this.createDefaultColumnConfig(column);
 
 		const editModal = new SimpleColumnEditModal(
-			app,
+			this.plugin.app,
 			column,
 			columnConfig,
 			(updatedColumn, updatedColumnConfig) => {
@@ -327,7 +335,7 @@ export class Table {
 		}
 
 		const editModal = new SimpleColumnEditModal(
-			app,
+			this.plugin.app,
 			column,
 			columnConfig,
 			(updatedColumn, updatedColumnConfig) => {
@@ -360,7 +368,7 @@ export class Table {
 		}
 
 		new DeleteConfirmModal(
-			app,
+			this.plugin.app,
 			'column',
 			() => {
 				this.tableData.columns.splice(columnIndex, 1);
@@ -383,5 +391,98 @@ export class Table {
 		this.tableConfig.columnConfigs[columnConfigIndex].width = width;
 
 		this.notifyConfigChangeListeners();
+	}
+
+	moveColumnLeft(columnId: TableColumnId): void {
+		const colIndex = this.getColumnIndexById(columnId);
+		const swapIndex = colIndex - 1;
+		if (swapIndex < 0) {
+			return;
+		}
+
+		this.swapColumnsAtIndex(colIndex, swapIndex);
+	}
+
+	moveColumnRight(columnId: TableColumnId): void {
+		const colIndex = this.getColumnIndexById(columnId);
+		const swapIndex = colIndex + 1;
+		if (swapIndex >= this.tableData.columns.length) {
+			return;
+		}
+
+		this.swapColumnsAtIndex(colIndex, swapIndex);
+	}
+
+	swapColumnsAtIndex(index1: number, index2: number): void {
+		[this.tableData.columns[index1], this.tableData.columns[index2]] = [this.tableData.columns[index2], this.tableData.columns[index1]];
+
+		this.notifyDataChangeListeners();
+	}
+
+	filter(columnId: TableColumnId, searchTerm: string, fuzzy: boolean): void {
+		if (!searchTerm) {
+			this.clearFilter();
+			return;
+		}
+
+		const searchResults: Fuzzysort.KeyResults<TableEntry> = fuzzysort.go(searchTerm, this.tableData.entries, { key: `data.${columnId}` });
+		for (const tableEntry of this.tableData.entries) {
+			tableEntry.visible = false;
+			tableEntry.highlightedData = {};
+		}
+		for (const searchResult of searchResults) {
+			searchResult.obj.visible = true;
+			searchResult.obj.highlightedData[columnId] = fuzzysort.highlight(searchResult, '<span class="db-plugin-highlight">', '</span>') ?? undefined;
+		}
+
+		this.notifyDataChangeListeners();
+	}
+
+	clearFilter(): void {
+		for (const tableEntry of this.tableData.entries) {
+			tableEntry.visible = true;
+			tableEntry.highlightedData = {};
+		}
+
+		this.notifyDataChangeListeners();
+	}
+
+	getEntryById(id: TableEntryId): TableEntry | undefined {
+		return this.tableData.entries.find(x => x.id === id);
+	}
+
+	getEntryIndexById(id: TableEntryId): number {
+		return this.tableData.entries.findIndex(x => x.id === id);
+	}
+
+	updateEntry(entryId: TableEntryId, updatedEntry: TableEntry): void {
+		const entryIndex = this.getEntryIndexById(entryId);
+		if (entryIndex === -1) {
+			throw new Error(`can not update entry '${entryId}'. A entry with this id does not exist.`);
+		}
+
+		this.tableData.entries[entryIndex] = updatedEntry;
+
+		this.notifyDataChangeListeners();
+	}
+
+	editEntryWithModal(entryId: TableEntryId): void {
+		const entry: TableEntry | undefined = this.getEntryById(entryId);
+
+		if (!entry) {
+			throw new Error(`can not edit entry '${entryId}'. A entry with this id does not exist.`);
+		}
+
+		const editModal = new EntryEditModal(
+			this.plugin,
+			entry,
+			this,
+			updatedEntry => {
+				this.updateEntry(updatedEntry.id, updatedEntry);
+			},
+			() => {}
+		);
+
+		editModal.open();
 	}
 }

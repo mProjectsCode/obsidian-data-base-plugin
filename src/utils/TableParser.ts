@@ -1,7 +1,7 @@
 import { EnclosingPair, ParserUtils } from '@opd-libs/opd-utils-lib/lib/ParserUtils';
 import { isTruthy } from '@opd-libs/opd-utils-lib/lib/Utils';
 import { trimString } from './Utils';
-import { TableColumn, TableData, TableEntry } from './Table';
+import { TableColumn, TableData, TableEntry, TableEntryId } from './Table';
 
 export class TableParser {
 	parseCSV(data: string): TableData {
@@ -20,18 +20,21 @@ export class TableParser {
 				name: trimString(x, '"').trim(),
 			}));
 
-			const tEntries: TableEntry[] = entries.slice(1).map(x => {
+			const tEntries: TableEntry[] = new Array(entries.length - 1);
+			for (let i = 1; i < entries.length; i++) {
 				const entry: TableEntry = {
 					id: crypto.randomUUID(),
 					data: {},
+					visible: true,
+					highlightedData: {},
 				};
 
-				for (let i = 0; i < tColumns.length; i++) {
-					entry.data[tColumns[i].id] = trimString(x[i], '"').trim();
+				for (let j = 0; j < tColumns.length; j++) {
+					entry.data[tColumns[j].id] = trimString(entries[i][j], '"').trim();
 				}
 
-				return entry;
-			});
+				tEntries[i - 1] = entry;
+			}
 
 			return {
 				columns: tColumns,

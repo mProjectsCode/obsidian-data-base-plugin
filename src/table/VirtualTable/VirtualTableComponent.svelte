@@ -175,6 +175,8 @@
 	});
 
 	function createChunks() {
+		console.log(entries);
+
 		chunks = [];
 		firstSubChunkHeight = -1;
 

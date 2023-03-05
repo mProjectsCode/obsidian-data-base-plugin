@@ -40,6 +40,21 @@
 			})
 			.addSeparator()
 			.addItem(item => {
+				item.setTitle('Move Column Left');
+				item.setIcon('chevron-left');
+				item.onClick(() => {
+					table.moveColumnLeft(column.id);
+				});
+			})
+			.addItem(item => {
+				item.setTitle('Move Column Right');
+				item.setIcon('chevron-right');
+				item.onClick(() => {
+					table.moveColumnRight(column.id);
+				});
+			})
+			.addSeparator()
+			.addItem(item => {
 				item.setTitle('Edit');
 				item.setIcon('edit');
 				item.onClick(() => {
