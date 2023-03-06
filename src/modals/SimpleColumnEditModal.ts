@@ -1,15 +1,25 @@
 import { App, Modal, Setting } from 'obsidian';
-import { TableColumn, TableColumnConfig, TableColumnDataType } from '../utils/Table';
+import { Table, TableColumn, TableColumnConfig, TableColumnDataType } from '../utils/Table';
 import { deepCopy } from '../utils/Utils';
+import DBPlugin from '../main';
 
 export class SimpleColumnEditModal extends Modal {
+	plugin: DBPlugin;
 	column: TableColumn;
 	columnConfig: TableColumnConfig;
 	onSubmit: (column: TableColumn, columnConfig: TableColumnConfig) => void;
 	onCancel: () => void;
 
-	constructor(app: App, column: TableColumn, columnConfig: TableColumnConfig, onSubmit: (column: TableColumn, columnConfig: TableColumnConfig) => void, onCancel: () => void) {
-		super(app);
+	constructor(
+		table: Table,
+		column: TableColumn,
+		columnConfig: TableColumnConfig,
+		onSubmit: (column: TableColumn, columnConfig: TableColumnConfig) => void,
+		onCancel: () => void
+	) {
+		super(table.plugin.app);
+
+		this.plugin = table.plugin;
 
 		// deep copy
 		this.column = deepCopy(column);

@@ -32,7 +32,6 @@ export class TableView extends AbstractTableView {
 	}
 
 	public setViewData(data: string, clear: boolean): void {
-		console.log('set view data');
 		const tableData: TableData = this.plugin.tableParser.parseCSV(data);
 		this.table = new Table(this.plugin, tableData, structuredClone(DEFAULT_TABLE_CONFIG));
 
@@ -54,12 +53,9 @@ export class TableView extends AbstractTableView {
 		this.data = '';
 	}
 
-	protected async onOpen(): Promise<void> {
-		console.log('table view opened');
-	}
+	protected async onOpen(): Promise<void> {}
 
 	protected async onClose(): Promise<void> {
-		console.log('table view closed');
 		this.tableComponent?.$destroy();
 	}
 }

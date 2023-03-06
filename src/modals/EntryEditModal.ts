@@ -10,10 +10,10 @@ export class EntryEditModal extends Modal {
 	onSubmit: (entry: TableEntry) => void;
 	onCancel: () => void;
 
-	constructor(plugin: DBPlugin, entry: TableEntry, table: Table, onSubmit: (entry: TableEntry) => void, onCancel: () => void) {
-		super(plugin.app);
+	constructor(table: Table, entry: TableEntry, onSubmit: (entry: TableEntry) => void, onCancel: () => void) {
+		super(table.plugin.app);
 
-		this.plugin = plugin;
+		this.plugin = table.plugin;
 
 		this.entry = deepCopy(entry);
 		this.table = table;

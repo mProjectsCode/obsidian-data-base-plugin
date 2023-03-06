@@ -1,7 +1,7 @@
 <script lang="ts">
 	import {onMount} from 'svelte';
 	import {AbstractTableView} from '../views/AbstractTableView';
-	import {Table, TableColumn, TableColumnId, TableEntry} from '../utils/Table';
+	import {Table, TableColumnId, TableEntry} from '../utils/Table';
 	import VirtualTableComponent from './VirtualTable/VirtualTableComponent.svelte';
 	import VirtualTableHeaderComponent from './VirtualTable/VirtualTableHeaderComponent.svelte';
 	import {Menu} from 'obsidian';
@@ -46,32 +46,40 @@
 	function showEntryActionsMenu(event: MouseEvent, entry: TableEntry): void {
 		new Menu()
 			.addItem(item => {
-				item.setTitle('Add Entry Below');
-				item.setIcon('align-horizontal-justify-start');
+				item.setTitle('View');
+				item.setIcon('eye');
 				item.onClick(() => {
-					table;
-				});
-			})
-			.addItem(item => {
-				item.setTitle('Add Entry Above');
-				item.setIcon('align-horizontal-justify-end');
-				item.onClick(() => {
-					table;
+					table.viewEntry(entry.id);
 				});
 			})
 			.addSeparator()
 			.addItem(item => {
-				item.setTitle('Move Down');
-				item.setIcon('chevron-left');
+				item.setTitle('Add Entry Above');
+				item.setIcon('align-vertical-justify-start');
 				item.onClick(() => {
-					table;
+					table.createEntryAbove(entry.id);
 				});
 			})
 			.addItem(item => {
-				item.setTitle('Move Up');
-				item.setIcon('chevron-right');
+				item.setTitle('Add Entry Below');
+				item.setIcon('align-vertical-justify-end');
 				item.onClick(() => {
-					table;
+					table.createEntryBelow(entry.id);
+				});
+			})
+			.addSeparator()
+			.addItem(item => {
+				item.setTitle('Move Up');
+				item.setIcon('chevron-up');
+				item.onClick(() => {
+					table.moveEntryUp(entry.id);
+				});
+			})
+			.addItem(item => {
+				item.setTitle('Move Down');
+				item.setIcon('chevron-down');
+				item.onClick(() => {
+					table.moveEntryDown(entry.id);
 				});
 			})
 			.addSeparator()
@@ -86,7 +94,7 @@
 				item.setTitle('Delete');
 				item.setIcon('trash');
 				item.onClick(() => {
-					table;
+					table.deleteEntryWithModal(entry.id);
 				});
 			})
 			.showAtMouseEvent(event);

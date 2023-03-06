@@ -11,7 +11,7 @@
 
 	});
 
-	function editFilePath() {
+	function editFilePath(): void {
 		const modal = new TextFieldModal(
 			view.app,
 			tableConfig.file,
@@ -22,6 +22,24 @@
 				tableConfig.file = value;
 				view.save();
 				view.loadTable(tableConfig);
+			},
+			() => {
+			},
+		);
+
+		modal.open();
+	}
+
+	function editEntryViewTemplateFilePath(): void {
+		const modal = new TextFieldModal(
+			view.app,
+			tableConfig.entryViewTemplateFile,
+			'Edit Entry View Template File Path',
+			'Entry View Template File Path',
+			'',
+			value => {
+				tableConfig.entryViewTemplateFile = value;
+				view.save();
 			},
 			() => {
 			},
@@ -45,5 +63,7 @@
 	<div class="flex-row">
 		<span>{tableConfig.file}</span>
 		<button class="btn" on:click={editFilePath}>Edit</button>
+		<span>{tableConfig.entryViewTemplateFile}</span>
+		<button class="btn" on:click={editEntryViewTemplateFilePath}>Edit</button>
 	</div>
 </div>

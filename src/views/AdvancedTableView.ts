@@ -32,12 +32,15 @@ export class AdvancedTableView extends AbstractTableView {
 	}
 
 	public setViewData(data: string, clear: boolean): void {
-		console.log('set view data');
+		console.trace();
+
+		console.log(this.leaf.getEphemeralState());
+		console.log(this.leaf.getViewState());
+
 		const tableConfig: TableConfig = structuredClone(DEFAULT_TABLE_CONFIG);
 
 		if (data) {
 			Object.assign(tableConfig, JSON.parse(data));
-			console.log(tableConfig);
 		}
 
 		this.contentEl.empty();

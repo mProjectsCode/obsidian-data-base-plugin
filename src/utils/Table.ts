@@ -1,10 +1,11 @@
-import { TFile } from 'obsidian';
+import { Component, MarkdownRenderer, TFile } from 'obsidian';
 import { compareTableEntriesByColumns, deepFreeze } from './Utils';
 import { SimpleColumnEditModal } from '../modals/SimpleColumnEditModal';
 import { DeleteConfirmModal } from '../modals/DeleteConfirmModal';
 import * as fuzzysort from 'fuzzysort';
 import DBPlugin from '../main';
 import { EntryEditModal } from '../modals/EntryEditModal';
+import * as Handlebars from 'handlebars';
 
 /**
  * TableData models the underlying (CSV) file
@@ -47,6 +48,7 @@ export interface TableConfig {
 	columnConfigs: TableColumnConfig[];
 	entriesPerPage: number;
 	file: string;
+	entryViewTemplateFile: string;
 }
 
 export interface SortingConfig {
@@ -83,6 +85,7 @@ export const DEFAULT_TABLE_CONFIG: TableConfig = {
 	columnConfigs: [] as TableColumnConfig[],
 	entriesPerPage: 500,
 	file: '',
+	entryViewTemplateFile: '',
 } as const;
 deepFreeze(DEFAULT_TABLE_CONFIG);
 
@@ -141,6 +144,8 @@ export class Table {
 		};
 	}
 
+	// region Listeners
+
 	addDataChangeListener(callback: (tableData: TableData) => void): string {
 		const id = crypto.randomUUID();
 		this.dataUpdateListeners.push({ id: id, callback: callback });
@@ -174,6 +179,8 @@ export class Table {
 			tableConfigUpdateCallbacks.callback(this.tableConfig);
 		}
 	}
+
+	// endregion
 
 	cycleSortingModeForColumn(column: TableColumn): void {
 		this.tableConfig.sortingConfig = {
@@ -228,6 +235,36 @@ export class Table {
 
 		this.notifyDataChangeListeners();
 	}
+
+	filter(columnId: TableColumnId, searchTerm: string, fuzzy: boolean): void {
+		if (!searchTerm) {
+			this.clearFilter();
+			return;
+		}
+
+		const searchResults: Fuzzysort.KeyResults<TableEntry> = fuzzysort.go(searchTerm, this.tableData.entries, { key: `data.${columnId}` });
+		for (const tableEntry of this.tableData.entries) {
+			tableEntry.visible = false;
+			tableEntry.highlightedData = {};
+		}
+		for (const searchResult of searchResults) {
+			searchResult.obj.visible = true;
+			searchResult.obj.highlightedData[columnId] = fuzzysort.highlight(searchResult, '<span class="db-plugin-highlight">', '</span>') ?? undefined;
+		}
+
+		this.notifyDataChangeListeners();
+	}
+
+	clearFilter(): void {
+		for (const tableEntry of this.tableData.entries) {
+			tableEntry.visible = true;
+			tableEntry.highlightedData = {};
+		}
+
+		this.notifyDataChangeListeners();
+	}
+
+	// region Columns
 
 	getColumnById(id: TableColumnId): TableColumn | undefined {
 		return this.tableData.columns.find(x => x.id === id);
@@ -309,7 +346,7 @@ export class Table {
 		const columnConfig: TableColumnConfig = this.createDefaultColumnConfig(column);
 
 		const editModal = new SimpleColumnEditModal(
-			this.plugin.app,
+			this,
 			column,
 			columnConfig,
 			(updatedColumn, updatedColumnConfig) => {
@@ -335,7 +372,7 @@ export class Table {
 		}
 
 		const editModal = new SimpleColumnEditModal(
-			this.plugin.app,
+			this,
 			column,
 			columnConfig,
 			(updatedColumn, updatedColumnConfig) => {
@@ -419,33 +456,9 @@ export class Table {
 		this.notifyDataChangeListeners();
 	}
 
-	filter(columnId: TableColumnId, searchTerm: string, fuzzy: boolean): void {
-		if (!searchTerm) {
-			this.clearFilter();
-			return;
-		}
+	// endregion
 
-		const searchResults: Fuzzysort.KeyResults<TableEntry> = fuzzysort.go(searchTerm, this.tableData.entries, { key: `data.${columnId}` });
-		for (const tableEntry of this.tableData.entries) {
-			tableEntry.visible = false;
-			tableEntry.highlightedData = {};
-		}
-		for (const searchResult of searchResults) {
-			searchResult.obj.visible = true;
-			searchResult.obj.highlightedData[columnId] = fuzzysort.highlight(searchResult, '<span class="db-plugin-highlight">', '</span>') ?? undefined;
-		}
-
-		this.notifyDataChangeListeners();
-	}
-
-	clearFilter(): void {
-		for (const tableEntry of this.tableData.entries) {
-			tableEntry.visible = true;
-			tableEntry.highlightedData = {};
-		}
-
-		this.notifyDataChangeListeners();
-	}
+	// region Entries
 
 	getEntryById(id: TableEntryId): TableEntry | undefined {
 		return this.tableData.entries.find(x => x.id === id);
@@ -453,6 +466,12 @@ export class Table {
 
 	getEntryIndexById(id: TableEntryId): number {
 		return this.tableData.entries.findIndex(x => x.id === id);
+	}
+
+	insertEntryAtIndex(entry: TableEntry, index: number): void {
+		this.tableData.entries.splice(index, 0, entry);
+
+		this.notifyDataChangeListeners();
 	}
 
 	updateEntry(entryId: TableEntryId, updatedEntry: TableEntry): void {
@@ -466,6 +485,50 @@ export class Table {
 		this.notifyDataChangeListeners();
 	}
 
+	createEntryAtEnd(): void {
+		this.createEntryAtIndexWithModal(this.tableData.columns.length - 1);
+	}
+
+	createEntryAbove(reference: TableEntryId): void {
+		const refIndex = this.getEntryIndexById(reference);
+		if (refIndex === -1) {
+			throw new Error(`can not insert entry above '${reference}'. A entry with this id does not exist.`);
+		}
+		this.createEntryAtIndexWithModal(refIndex);
+	}
+
+	createEntryBelow(reference: TableEntryId): void {
+		const refIndex = this.getEntryIndexById(reference);
+		if (refIndex === -1) {
+			throw new Error(`can not insert entry below '${reference}'. A entry with this id does not exist.`);
+		}
+		this.createEntryAtIndexWithModal(refIndex + 1);
+	}
+
+	createEntryAtIndexWithModal(index: number): void {
+		const entry: TableEntry = {
+			data: {},
+			id: crypto.randomUUID(),
+			visible: true,
+			highlightedData: {},
+		};
+
+		for (const column of this.tableData.columns) {
+			entry.data[column.id] = '';
+		}
+
+		const editModal = new EntryEditModal(
+			this,
+			entry,
+			updatedEntry => {
+				this.insertEntryAtIndex(updatedEntry, index);
+			},
+			() => {}
+		);
+
+		editModal.open();
+	}
+
 	editEntryWithModal(entryId: TableEntryId): void {
 		const entry: TableEntry | undefined = this.getEntryById(entryId);
 
@@ -474,9 +537,8 @@ export class Table {
 		}
 
 		const editModal = new EntryEditModal(
-			this.plugin,
-			entry,
 			this,
+			entry,
 			updatedEntry => {
 				this.updateEntry(updatedEntry.id, updatedEntry);
 			},
@@ -485,4 +547,80 @@ export class Table {
 
 		editModal.open();
 	}
+
+	deleteEntryWithModal(entryId: TableEntryId): void {
+		const entryIndex: number = this.getEntryIndexById(entryId);
+
+		if (entryIndex === -1) {
+			throw new Error(`can not delete entry '${entryId}'. A entry with this id does not exist.`);
+		}
+
+		new DeleteConfirmModal(
+			this.plugin.app,
+			'entry',
+			() => {
+				this.tableData.entries.splice(entryIndex, 1);
+
+				this.notifyDataChangeListeners();
+			},
+			() => {}
+		).open();
+	}
+
+	moveEntryUp(entryId: TableEntryId): void {
+		const entryIndex = this.getEntryIndexById(entryId);
+		const swapIndex = entryIndex - 1;
+		if (swapIndex < 0) {
+			return;
+		}
+
+		this.swapEntriesAtIndex(entryIndex, swapIndex);
+	}
+
+	moveEntryDown(entryId: TableEntryId): void {
+		const colIndex = this.getEntryIndexById(entryId);
+		const swapIndex = colIndex + 1;
+		if (swapIndex >= this.tableData.entries.length) {
+			return;
+		}
+
+		this.swapEntriesAtIndex(colIndex, swapIndex);
+	}
+
+	swapEntriesAtIndex(index1: number, index2: number): void {
+		[this.tableData.entries[index1], this.tableData.entries[index2]] = [this.tableData.entries[index2], this.tableData.entries[index1]];
+
+		this.notifyDataChangeListeners();
+	}
+
+	viewEntry(entryId: TableEntryId): void {
+		const entry: TableEntry | undefined = this.getEntryById(entryId);
+
+		if (!entry) {
+			throw new Error(`can not view entry '${entryId}'. A entry with this id does not exist.`);
+		}
+
+		this.plugin.openEntryView(entry, this);
+	}
+
+	async renderEntry(entry: TableEntry, container: HTMLElement, component: Component): Promise<void> {
+		const templateFile = this.plugin.app.vault.getAbstractFileByPath(this.tableConfig.entryViewTemplateFile);
+		if (!templateFile || !(templateFile instanceof TFile)) {
+			container.createEl('p', { text: `Invalid entry template file path '${this.tableConfig.entryViewTemplateFile}'` });
+			return;
+		}
+
+		const formattedEntry: Record<string, string> = {};
+		for (const column of this.tableData.columns) {
+			formattedEntry[column.name] = entry.data[column.id] ?? '';
+		}
+
+		const templateContent = await this.plugin.app.vault.cachedRead(templateFile);
+		const template = Handlebars.compile(templateContent);
+		const content = template(formattedEntry);
+
+		await MarkdownRenderer.renderMarkdown(content, container, this.tableConfig.entryViewTemplateFile, component);
+	}
+
+	// endregion
 }

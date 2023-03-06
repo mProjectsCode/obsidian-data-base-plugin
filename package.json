@@ -42,6 +42,7 @@
 	"dependencies": {
 		"@opd-libs/opd-utils-lib": "0.0.2",
 		"clusterize.js": "0.18.0",
-		"fuzzysort": "^2.0.4"
+		"fuzzysort": "^2.0.4",
+		"handlebars": "^4.7.7"
 	}
 }

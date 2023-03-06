@@ -1,76 +1,77 @@
 {
     "sortingConfig": {
         "mode": "descending",
-        "column": "e6246cf9-537c-4856-8b47-bb19c3009aaa"
+        "column": "db0d2961-76d3-4d74-903e-dc445c24b6bd"
     },
     "columnConfigs": [
         {
-            "columnId": "4e7bace8-7d74-41fa-9274-20193f7569fd",
+            "columnId": "813aba98-dd5a-4d94-a72a-2635beaedcd7",
             "columnName": "seq",
             "dataType": "number",
             "width": 150
         },
         {
-            "columnId": "9ea0437d-b22c-4833-ab25-76c760ed9bf3",
+            "columnId": "4e54c0dc-bc19-4f59-9f6f-f70178acff6a",
             "columnName": "name",
             "dataType": "string",
             "width": 150
         },
         {
-            "columnId": "d4ee7938-0809-4956-91ba-7c5860bd9d49",
+            "columnId": "ac1547d0-97bf-4df3-8a45-8743a3ad56f4",
             "columnName": "first",
             "dataType": "string",
             "width": 150
         },
         {
-            "columnId": "8b80094c-cc9a-4c8d-a970-7f0b3f4c721b",
+            "columnId": "e222b53c-67d5-44a2-bc70-134b1f9da803",
             "columnName": "last",
             "dataType": "string",
             "width": 150
         },
         {
-            "columnId": "7f0343ea-275f-4298-a0a0-d2f194b986d5",
+            "columnId": "89801a5f-f18a-4841-86c6-fd5045eb35d5",
             "columnName": "age",
             "dataType": "string",
             "width": 150
         },
         {
-            "columnId": "e3bb16fa-5651-46f0-899f-47c5287c3ecd",
+            "columnId": "278aba89-0a35-4129-9c72-76cb767fbba0",
             "columnName": "city",
             "dataType": "string",
             "width": 150
         },
         {
-            "columnId": "7e54a9a4-b61f-4514-ac36-8539e5037114",
+            "columnId": "a4546ad8-f918-40fa-9522-cefaf48ea8a2",
             "columnName": "state",
             "dataType": "string",
             "width": 150
         },
         {
-            "columnId": "af8b18d0-492f-4817-8694-8f00700c25d0",
+            "columnId": "723be206-1723-4e12-b1d3-2930ffab9853",
             "columnName": "zip9",
             "dataType": "string",
             "width": 150
         },
         {
-            "columnId": "403b22f3-5c88-46c6-abdf-9566d41719ca",
+            "columnId": "4d2df744-90a8-4a71-8ab9-324a091a8c5b",
             "columnName": "float",
             "dataType": "string",
             "width": 150
         },
         {
-            "columnId": "44cc52a2-b0d0-422e-a1d9-096c70b3cdf2",
+            "columnId": "7fab4169-c16e-42da-99a7-51c686250250",
             "columnName": "guid",
             "dataType": "string",
             "width": 150
         },
         {
-            "columnId": "6f958142-e7ec-4650-9535-e344d181994f",
+            "columnId": "480e7892-0633-46f5-b287-ce0a9b671ca3",
             "columnName": "date",
             "dataType": "string",
             "width": 150
         }
     ],
     "entriesPerPage": 500,
-    "file": "test-data-10000.csv"
+    "file": "test-data/test-data-10000.csv",
+    "entryViewTemplateFile": "test-data/test-data-template.md"
 }

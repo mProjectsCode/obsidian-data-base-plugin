@@ -5,24 +5,25 @@
     },
     "columnConfigs": [
         {
-            "columnId": "2474c2d6-afca-4e72-aa8a-36936134ecba",
+            "columnId": "beabb865-b9c0-4586-9d6c-a0f5b9b6699f",
             "columnName": "Column 1",
             "dataType": "string",
             "width": 150
         },
         {
-            "columnId": "a33be369-2c6c-4edf-8175-a243ddc55a8e",
+            "columnId": "c223fc8d-7b67-4d1e-b78e-f4606d20bd21",
             "columnName": "Column 2",
             "dataType": "string",
             "width": 150
         },
         {
-            "columnId": "bfb5cf13-a53d-4b05-a95e-84441f573643",
+            "columnId": "8adc44fa-724d-44d1-b4a4-a6a244a67b0e",
             "columnName": "Column 3",
             "dataType": "string",
             "width": 150
         }
     ],
     "entriesPerPage": 500,
-    "file": "test.csv"
+    "file": "test.csv",
+    "entryViewTemplateFile": "Template Test.md"
 }
